@@ -59,8 +59,22 @@
     <string name="pref_ringtone_silent">Silent</string>
 
     <string name="pref_title_vibrate">Vibrate</string>
+
+
+    <!-- Menu -->
+    <string name="menu">Menu</string>
+
+    <!-- Calibration window -->
+
     <string name="btnSaveScan">Save scan</string>
-    <string name="title_activity_calibration">Calibration</string>
+    <string name="calibration">Calibration</string>
+
+    <!-- Calibrate window -->
     <string name="btnMenuCalibrate">Calibrate</string>
     <string name="btnRemoveScan">Remove scan</string>
+
+    <string name="title_activity_menu">MenuActivity</string>
+    <string name="title_activity_locate">LocateActivity</string>
+
+
 </resources>

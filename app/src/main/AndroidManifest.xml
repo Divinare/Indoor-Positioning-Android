@@ -17,8 +17,11 @@
         </activity>
         <activity
             android:name=".CalibrationActivity"
-            android:label="@string/title_activity_calibration"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:label="@string/calibration"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".LocateActivity"
+            android:label="@string/title_activity_locate"></activity>
     </application>
 
 </manifest>

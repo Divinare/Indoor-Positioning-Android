@@ -1,11 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="joe.indoorlocalization" >
+    tools:context="joe.indoorLocalization" >
 
-    <item
-        android:id="@+id/action_settings"
+  <!--  <item
+        android:id="@+id/action_menu"
         android:orderInCategory="100"
         android:title="@string/menu"/>
+        -->
+    <item
+        android:id="@+id/menu_locate"
+        android:title="Locate"/>
+    <item
+        android:id="@+id/menu_calibrate"
+        android:title="Calibrate"/>
+    <item
+        android:id="@+id/menu_setPosition"
+        android:title="Set Position"/>
+    <item
+        android:id="@+id/menu_help"
+        android:title="Help"/>
 
 </menu>

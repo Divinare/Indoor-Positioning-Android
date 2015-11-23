@@ -23,11 +23,23 @@
         android:layout_height="wrap_content" />
 
     <Button
-        android:layout_width="wrap_content"
+        android:id="@+id/btnMenuLocate"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:text="@string/btnMenuLocate"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/btnMenuCalibrate"
+        android:onClick="startLocateActivity" />
+
+    <Button
+        android:id="@+id/btnMenuCalibrate"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:text="@string/btnMenuCalibrate"
-        android:id="@+id/btnMenuCalibrate"
         android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:onClick="startCalibrateActivity" />
+
 
 </RelativeLayout>

@@ -10,21 +10,22 @@
     tools:context="joe.indoorlocalization.LocateActivity">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:id="@+id/locationCoordinates"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="X: - Y: - Z: -"
-        android:id="@+id/textView2"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />
 
-
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/imageView"
-        android:src="@drawable/exactum1"
+    <joe.indoorlocalization.CustomImageViewLocate
+        android:id="@+id/customImageViewLocate"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_above="@+id/locationCoordinates"
+        android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:scaleType="matrix"
+        android:src="@drawable/exactum1" />
+
 </RelativeLayout>

@@ -63,18 +63,20 @@
 
     <!-- Menu -->
     <string name="menu">Menu</string>
+    <string name="btnMenuCalibrate">Calibrate</string>
+    <string name="btnMenuLocate">Locate</string>
 
     <!-- Calibration window -->
-
     <string name="btnSaveScan">Save scan</string>
+    <string name="btnScanLog">Scan log</string>
     <string name="calibration">Calibration</string>
 
-    <!-- Calibrate window -->
-    <string name="btnMenuCalibrate">Calibrate</string>
-    <string name="btnRemoveScan">Remove scan</string>
+    <!-- Scan log -->
+    <string name="btnBack">Back</string>
 
     <string name="title_activity_menu">MenuActivity</string>
     <string name="title_activity_locate">LocateActivity</string>
+    <string name="title_activity_scan_log">ScanLogActivity</string>
 
 
 </resources>

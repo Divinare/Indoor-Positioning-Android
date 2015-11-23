@@ -12,50 +12,85 @@
     tools:context="joe.indoorlocalization.CalibrationActivity"
     tools:showIn="@layout/activity_calibration">
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Save scan"
-        android:id="@+id/btnSaveScan"
-        android:layout_marginBottom="62dp"
-        android:layout_marginLeft="51dp"
-        android:layout_marginStart="51dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/calibrationTopBar"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/btnRemoveScan"
-        android:id="@+id/button"
-        android:layout_alignTop="@+id/btnSaveScan"
-        android:layout_toRightOf="@+id/btnSaveScan"
-        android:layout_toEndOf="@+id/btnSaveScan"
-        android:layout_marginLeft="48dp"
-        android:layout_marginStart="48dp" />
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:id="@+id/positionX"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Calibration"
-        android:id="@+id/calibration"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="X: -"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_weight="1"/>
 
-    <joe.indoorlocalization.CustomImageView
-        android:id="@+id/customImageView2"
+    <TextView
+        android:id="@+id/positionY"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Y: -"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_weight="1"/>
+
+    <TextView
+        android:id="@+id/positionZ"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Z: -"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_weight="1"/>
+
+    </LinearLayout>
+
+    <joe.indoorlocalization.CustomImageViewCalibrate
+        android:id="@+id/customImageViewCalibrate"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_marginBottom="15dp"
-        android:layout_marginLeft="15dp"
-        android:layout_marginRight="15dp"
-        android:layout_marginTop="15dp"
+        android:layout_above="@+id/calibrationBottomBar"
+        android:layout_below="@+id/calibrationTopBar"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:scaleType="matrix"/>
+        android:scaleType="matrix"
+        android:src="@drawable/exactum1" />
+
+    <LinearLayout
+        android:id="@+id/calibrationBottomBar"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true">
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:id="@+id/btnSaveScan"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:text="Save scan"
+            android:layout_weight="1"
+            android:onClick="saveRecord" />
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:id="@+id/btnRemoveScan"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:text="@string/btnScanLog"
+            android:layout_weight="1"
+            android:onClick="showScanLog" />
+
+
+    </LinearLayout>
 
 </RelativeLayout>

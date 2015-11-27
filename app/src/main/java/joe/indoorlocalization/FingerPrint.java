@@ -10,6 +10,8 @@ public class FingerPrint extends SugarRecord<FingerPrint> {
     public float x;
     public float y;
 
+
+
     public FingerPrint(){
 
     }

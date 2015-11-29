@@ -57,9 +57,10 @@ public class WifiScanner extends CalibrationActivity {
 
     int cells = 51; //Needs to match the number of icons in "drawable"
 
-    static StringBuilder fingerprint;
+    //static StringBuilder fingerprint;
     static StringBuilder macs;
-    static StringBuilder rssi;
+    static StringBuilder RSSIs;
+    static StringBuilder networks;
 
     private Context context;
 /*
@@ -69,11 +70,10 @@ public class WifiScanner extends CalibrationActivity {
 */
     public WifiScanner(Context c) {
         this.context = c;
-        init();
+        initialize();
     }
 
-    private void init() {
-
+    private void initialize() {
         mainWifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         wakeLock = pm.newWakeLock(
@@ -89,25 +89,25 @@ public class WifiScanner extends CalibrationActivity {
 
     }
 
-
-    //First method called when application starts
-  //  public void onCreate(Bundle savedInstanceState) {
-        //super.onCreate(savedInstanceState);
-
-        // Tarviikohan tätä:
-        //setContentView(R.layout.activity_main);
-
-        //Initializations
-
-   // }
-
-    public void scan() {
+    public void start() {
         task.execute();
     }
 
-    public void pause() {
-        task.getStatus();
+    public void stop() {
+        task.cancel(true);
     }
+
+    public StringBuilder getMacs() {
+        return this.macs;
+    }
+    public StringBuilder getRSSIs() {
+        return this.RSSIs;
+    }
+
+    public StringBuilder getNetworks() {
+        return this.networks;
+    }
+
 
     protected void onPause() {
         unregisterReceiver(receiverWifi);
@@ -127,35 +127,37 @@ public class WifiScanner extends CalibrationActivity {
          */
         public void onReceive(Context c, Intent intent) {
             Log.d("FINGER","Scan received");
-            if(progressDialog.getProgress()<=progressDialog.getMax()){
+
+            RSSIs = new StringBuilder();
+            macs = new StringBuilder();
+            networks = new StringBuilder();
+
+            if (progressDialog.getProgress()<=progressDialog.getMax()) {
                 wifiList = mainWifi.getScanResults();
 
-                rssi = new StringBuilder();
-                macs = new StringBuilder();
-                for(int j=0;j<wifiList.size();j++){
+                for(int j=0; j<wifiList.size(); j++) {
                     macs.append(wifiList.get(j).BSSID);
-                    if(j<wifiList.size()-1){
+                    if (j<wifiList.size()-1) {
                         macs.append(",");
                     }
-                    rssi.append(wifiList.get(j).level);
-                    if(j<wifiList.size()-1){
-                        rssi.append(",");
+                    RSSIs.append(wifiList.get(j).level);
+                    if (j<wifiList.size()-1) {
+                        RSSIs.append(",");
+                    }
+                    networks.append(wifiList.get(j).SSID);
+                    if (j<wifiList.size()-1) {
+                        networks.append(",");
                     }
                 }
-                fingerprint.append(" MACS :");
+                /*
                 fingerprint.append(macs);
                 fingerprint.append("\n");
-                fingerprint.append(" RSSI :");
-                fingerprint.append(rssi);
+                fingerprint.append(RSSIs);
                 fingerprint.append("\n");
-                String strMacs = macs.toString();
-                List<String> macsList = Arrays.asList(strMacs.split(","));
-                fingerprint.append(" MACS Length: " + macsList.size());
+                fingerprint.append(networks);
                 fingerprint.append("\n");
-                String strRSSI = rssi.toString();
-                List<String> rssiList = Arrays.asList(strRSSI.split(","));
-                fingerprint.append(" RSSI Length: " + rssiList.size());
-                fingerprint.append("\n");
+                */
+
                 progressDialog.incrementProgressBy(1);
 
                 mainWifi.startScan();
@@ -174,13 +176,14 @@ public class WifiScanner extends CalibrationActivity {
             progressDialog.setProgress(0);
             mainWifi.startScan();
 
-            fingerprint = new StringBuilder();
+            //fingerprint = new StringBuilder();
+
 
             wakeLock.acquire();
             while(running){
                 //Store the recorded fingerprint in a file named after the cell in which it was recorded
                 if(!progressDialog.isShowing() || progressDialog.getProgress()>=progressDialog.getMax()){
-                    Log.d(TAG, fingerprint.toString());
+                    //Log.d(TAG, fingerprint.toString());
 
                     /*
                     File file = new File(PATH, "/fingerprints/"+params[0]+".txt");

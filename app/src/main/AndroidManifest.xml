@@ -24,7 +24,7 @@
             android:value="records.db" />
         <meta-data
             android:name="VERSION"
-            android:value="3" />
+            android:value="6" />
         <meta-data
             android:name="QUERY_LOG"
             android:value="true" />
@@ -43,7 +43,8 @@
             android:name=".CalibrationActivity"
             android:label="@string/calibration"
             android:theme="@style/AppTheme.NoActionBar"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:launchMode="singleTask" />
         <activity
             android:name=".LocateActivity"
             android:label="@string/title_activity_locate" />

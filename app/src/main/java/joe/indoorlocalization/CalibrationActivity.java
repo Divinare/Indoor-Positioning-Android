@@ -14,6 +14,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+
 public class CalibrationActivity extends AppCompatActivity {
 
     static String TAG = CalibrationActivity.class.getSimpleName();
@@ -29,21 +33,29 @@ public class CalibrationActivity extends AppCompatActivity {
         customImageView = (CustomImageView) findViewById(R.id.customImageViewCalibrate);
 
         wifiScanner = new WifiScanner(this);
+        wifiScanner.start();
     }
 
     public void saveRecord(View v) {
-        wifiScanner.scan();
+        String macs = wifiScanner.getMacs().toString();
+        String RSSIs = wifiScanner.getRSSIs().toString();
+        String networks = wifiScanner.getNetworks().toString();
+
         Point point = customImageView.getLastPoint();
         float x = point.x;
         float y = point.y;
-        Log.i(TAG, "Scan saved, x: " + x + " y: " + y);
-        FingerPrint fingerPrint = new FingerPrint(x, y);
+        int z = 1;
+
+        FingerPrint fingerPrint = new FingerPrint(x, y, z, macs, RSSIs, networks);
+        Log.i(TAG, x + ", " + y + ", " + z + "\n" + macs + "\n" + RSSIs + "\n" + networks + "\n");
+
         fingerPrint.save();
 
     }
 
     public void showScanLog(View v) {
         Intent intentScanLog = new Intent(this, ScanLogActivity.class);
+        //wifiScanner.stop();
         startActivity(intentScanLog);
     }
 

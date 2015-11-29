@@ -1,4 +1,4 @@
-package joe.indoorlocalization;
+package com.joe.indoorlocalization;
 
 import com.orm.SugarRecord;
 

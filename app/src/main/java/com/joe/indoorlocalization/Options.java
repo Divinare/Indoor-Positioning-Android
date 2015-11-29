@@ -1,8 +1,9 @@
-package joe.indoorlocalization;
+package com.joe.indoorlocalization;
 
 import android.content.Context;
 import android.content.Intent;
 import android.view.MenuItem;
+
 
 /**
  * Created by joe on 22/11/15.

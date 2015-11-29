@@ -1,9 +1,10 @@
-package joe.indoorlocalization;
+package com.joe.indoorlocalization;
 
 import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.TextView;
+
 
 /**
  * Created by joe on 22/11/15.

@@ -8,7 +8,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="joe.indoorlocalization.LocateActivity">
+    tools:context="com.joe.indoorlocalization.LocateActivity">
 
     <ListView
         android:id="@+id/navList"
@@ -57,7 +57,7 @@
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true" />
 
-        <joe.indoorlocalization.CustomImageViewLocate
+        <com.joe.indoorlocalization.CustomImageViewLocate
             android:id="@+id/customImageViewLocate"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"

@@ -1,12 +1,7 @@
-package joe.indoorlocalization;
+package com.joe.indoorlocalization;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.graphics.Matrix;
 import android.graphics.Point;
-import android.graphics.PointF;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.widget.DrawerLayout;
@@ -27,9 +22,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+
 
 public class CalibrationActivity extends AppCompatActivity {
 
@@ -72,19 +70,8 @@ public class CalibrationActivity extends AppCompatActivity {
     }
 
     public void saveRecord(View v) {
+        //wifiScanner.startScan();
         saveIntoFile();
-
-        String macs = wifiScanner.getMacs().toString();
-        String RSSIs = wifiScanner.getRSSIs().toString();
-        String networks = wifiScanner.getNetworks().toString();
-
-        Point point = customImageView.getLastPoint();
-        float x = point.x;
-        float y = point.y;
-        int z = floor;
-
-        FingerPrint fingerPrint = new FingerPrint(x, y, z, macs, RSSIs, networks);
-        Log.i(TAG, x + ", " + y + ", " + z + "\n" + macs + "\n" + RSSIs + "\n" + networks + "\n");
 
     }
 
@@ -94,69 +81,39 @@ public class CalibrationActivity extends AppCompatActivity {
     }
 
     private void saveIntoFile() {
-        String fileName = "dataJoe";
-        //File dir = new File(PATH, "dataJoe.txt"); // + fileName+".txt");
-        //dir.mkdirs();
-
-        String[] dataa = new String[3];
-        dataa[0] = "Asd";
-        dataa[1] = "hmm";
-        dataa[2] = "rivi 3";
-
+        String fileName = "dataJoe.txt";
 
         File file = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), fileName);
-              /*  if( file.exists() ){
+        /*  if( file.exists() ){
             file.delete();
             Log.d(TAG, "Old fingerprint file deleted...");
         }*/
 
-        try{
-            OutputStream os = new FileOutputStream(file, false);
-            os.write("jotain vaan jeejee".getBytes());
+        Log.i(TAG, "Trying to save file...");
+
+
+        StringBuilder fingerPrintData = wifiScanner.getFingerPrintData();
+        Point point = customImageView.getLastPoint();
+        float x = point.x;
+        float y = point.y;
+        int z = floor;
+
+        // FORMAT: z;x;y;mac;rssi;mac;rssi;mac;rssi...
+        String row = z + ";" + x + ";" + y + ";" + fingerPrintData.toString();
+
+        try {
+            OutputStream os = new FileOutputStream(file, true);
+            os.write("\n".getBytes());
+            os.write(row.getBytes());
             os.close();
-        }catch(Exception e){
+            os.flush();
+            Log.i(TAG, "File saved");
+        } catch (Exception e) {
+            Log.d(TAG, "Error on saving file");
             Log.d(TAG, "Exception on data export");
             Log.d(TAG, e.getMessage());
         }
-
-
-
-/*
-        File myFile = new File(Environment.getExternalStorageDirectory(), "dir/joenData.txt");
-        if (!myFile.exists()) {
-            myFile.mkdirs();
-            try {
-                myFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-
-        Save(myFile, dataa);
-        */
     }
-
-/*
-    //returns an empty string if successful, otherwise an error message
-    public static String writePrintsToFile(List<WifiFingerPrint> prints, File folder, String fileName){
-        if( !isExternalStorageWritable() ){
-            return "external storage not writable";
-        }
-        File file = new File(folder, fileName);
-        try{
-            OutputStream os = new FileOutputStream(file, false);
-            os.write(printsToString(prints).getBytes());
-            os.close();
-        }catch(Exception e){
-            Log.d(TAG, "Exception on data export");
-            Log.d(TAG, e.getMessage());
-            return "Exception on data export";
-        }
-        return "";
-    }
-    */
-
 
 
 
@@ -245,7 +202,6 @@ public class CalibrationActivity extends AppCompatActivity {
 
     public void showScanLog(View v) {
         Intent intentScanLog = new Intent(this, ScanLogActivity.class);
-        //wifiScanner.stop();
         startActivity(intentScanLog);
     }
 

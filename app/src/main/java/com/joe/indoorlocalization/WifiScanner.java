@@ -1,15 +1,11 @@
-package joe.indoorlocalization;
+package com.joe.indoorlocalization;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 
 //import jsc.distributions.Normal;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -18,7 +14,6 @@ import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.os.Environment;
 import android.os.PowerManager;
 import android.util.Log;
@@ -40,9 +35,7 @@ public class WifiScanner extends CalibrationActivity {
     WifiManager mainWifi;
     WifiReceiver receiverWifi;
     List<ScanResult> wifiList;
-    boolean none;
-    //Root directory of the phone's SD card. We delve into subfolders from here
-    static final File PATH = Environment.getExternalStorageDirectory();
+
     //The maximum number of fingerprints we want to record (for a ballpark figure, assume approx. 1 fingerprint/second on current Android devices)
     static final int MAXPRINTS = 10;
 
@@ -57,9 +50,9 @@ public class WifiScanner extends CalibrationActivity {
 
     int cells = 51; //Needs to match the number of icons in "drawable"
 
-    //static StringBuilder fingerprint;
-    static StringBuilder macs;
-    static StringBuilder RSSIs;
+    static StringBuilder fingerPrintData; // mac;rssi;mac;rssi... format
+    //static StringBuilder macs;
+    //static StringBuilder RSSIs;
     static StringBuilder networks;
 
     private Context context;
@@ -97,11 +90,8 @@ public class WifiScanner extends CalibrationActivity {
         task.cancel(true);
     }
 
-    public StringBuilder getMacs() {
-        return this.macs;
-    }
-    public StringBuilder getRSSIs() {
-        return this.RSSIs;
+    public StringBuilder getFingerPrintData() {
+        return this.fingerPrintData;
     }
 
     public StringBuilder getNetworks() {
@@ -128,15 +118,22 @@ public class WifiScanner extends CalibrationActivity {
         public void onReceive(Context c, Intent intent) {
             Log.d("FINGER","Scan received");
 
-            RSSIs = new StringBuilder();
-            macs = new StringBuilder();
+            fingerPrintData = new StringBuilder();
+            //RSSIs = new StringBuilder();
+            //macs = new StringBuilder();
             networks = new StringBuilder();
 
             if (progressDialog.getProgress()<=progressDialog.getMax()) {
                 wifiList = mainWifi.getScanResults();
 
                 for(int j=0; j<wifiList.size(); j++) {
-                    macs.append(wifiList.get(j).BSSID);
+                    fingerPrintData.append(wifiList.get(j).BSSID);
+                    fingerPrintData.append(';');
+                    fingerPrintData.append(wifiList.get(j).level);
+                    if (j<wifiList.size()-1) {
+                        fingerPrintData.append(";");
+                    }
+                    /*
                     if (j<wifiList.size()-1) {
                         macs.append(",");
                     }
@@ -148,6 +145,7 @@ public class WifiScanner extends CalibrationActivity {
                     if (j<wifiList.size()-1) {
                         networks.append(",");
                     }
+                    */
                 }
                 /*
                 fingerprint.append(macs);
@@ -171,7 +169,6 @@ public class WifiScanner extends CalibrationActivity {
     private class RecordFingerprints extends AsyncTask<Integer, String, Hashtable<String,List<Integer>>> {
         boolean running = true;
         protected Hashtable<String,List<Integer>> doInBackground(Integer... params) {
-            Log.d("hmm", "" + progressDialog.getMax());
 
             progressDialog.setProgress(0);
             mainWifi.startScan();

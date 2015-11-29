@@ -63,7 +63,7 @@ public class CustomImageView extends ImageView {
     }
 
     public void setX(float x) {
-        Log.i(TAG, "At set x...");
+
     }
     public void setY(float y) {
 

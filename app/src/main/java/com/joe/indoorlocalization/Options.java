@@ -1,8 +1,12 @@
 package com.joe.indoorlocalization;
 
+import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.view.MenuItem;
+
+import com.joe.indoorlocalization.Calibration.CalibrationActivity;
+import com.joe.indoorlocalization.Calibration.ImportDatabase;
 
 
 /**
@@ -19,14 +23,15 @@ public class Options {
 
         final Intent intentLocate = new Intent(context, LocateActivity.class);
         final Intent intentCalibrate = new Intent(context, CalibrationActivity.class);
-
+        final Intent intentImportDatabase = new Intent(context, ImportDatabase.class);
 
         int id = item.getItemId();
         if (id == R.id.menu_locate) {
             context.startActivity(intentLocate);
         } else if(id == R.id.menu_calibrate) {
             context.startActivity(intentCalibrate);
-        } else if(id == R.id.menu_setPosition) {
+        } else if(id == R.id.menu_import_database) {
+            context.startActivity(intentImportDatabase);
             return true;
         } else if(id == R.id.menu_help) {
             return true;

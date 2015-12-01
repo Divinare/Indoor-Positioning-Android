@@ -12,6 +12,9 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.joe.indoorlocalization.Calibration.CalibrationActivity;
+import com.joe.indoorlocalization.Models.FingerPrint;
+
 import java.util.List;
 
 public class ScanLogActivity extends Activity {
@@ -30,11 +33,11 @@ public class ScanLogActivity extends Activity {
             float x = fingerPrints.get(i).getX();
             float y = fingerPrints.get(i).getY();
             float z = fingerPrints.get(i).getZ();
-            String macs = fingerPrints.get(i).getMacs();
-            String RSSIs = fingerPrints.get(i).getRSSIs();
-            String networks = fingerPrints.get(i).getNetworks();
+            //String macs = fingerPrints.get(i).getMacs();
+            //String RSSIs = fingerPrints.get(i).getRSSIs();
+            //String networks = fingerPrints.get(i).getNetworks();
 
-            Log.i(TAG, x + ", " + y + ", " + z + "\n" + macs + "\n" + RSSIs + "\n" + networks + "\n");
+            //Log.i(TAG, x + ", " + y + ", " + z + "\n" + macs + "\n" + RSSIs + "\n" + networks + "\n");
             LinearLayout ll = new LinearLayout(this);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);

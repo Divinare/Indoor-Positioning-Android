@@ -1,16 +1,19 @@
-package com.joe.indoorlocalization;
+package com.joe.indoorlocalization.Calibration;
 
 import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
+import com.joe.indoorlocalization.CustomImageView;
+import com.joe.indoorlocalization.R;
+
 /**
  * Created by joe on 22/11/15.
  */
 public class CustomImageViewCalibrate extends CustomImageView {
 
-    static String TAG = "CustomImageViewCalibrate";
+    static String TAG = CustomImageViewCalibrate.class.getSimpleName();
 
 
     public CustomImageViewCalibrate(Context context, AttributeSet attrs) {

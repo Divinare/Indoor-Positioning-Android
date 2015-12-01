@@ -1,6 +1,5 @@
 package com.joe.indoorlocalization;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -14,9 +13,10 @@ import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.os.PowerManager;
 import android.util.Log;
+
+import com.joe.indoorlocalization.Calibration.CalibrationActivity;
 
 /**
  *  Is used for Wifi fingerprints.
@@ -127,12 +127,14 @@ public class WifiScanner extends CalibrationActivity {
                 wifiList = mainWifi.getScanResults();
 
                 for(int j=0; j<wifiList.size(); j++) {
-                    fingerPrintData.append(wifiList.get(j).BSSID);
-                    fingerPrintData.append(';');
-                    fingerPrintData.append(wifiList.get(j).level);
-                    if (j<wifiList.size()-1) {
-                        fingerPrintData.append(";");
-                    }
+
+                    if(wifiList.get(j).level != 0) {
+                        fingerPrintData.append(wifiList.get(j).BSSID);
+                        fingerPrintData.append(';');
+                        fingerPrintData.append(wifiList.get(j).level);
+                        if (j < wifiList.size() - 1) {
+                            fingerPrintData.append(";");
+                        }
                     /*
                     if (j<wifiList.size()-1) {
                         macs.append(",");
@@ -146,6 +148,7 @@ public class WifiScanner extends CalibrationActivity {
                         networks.append(",");
                     }
                     */
+                    }
                 }
                 /*
                 fingerprint.append(macs);

@@ -1,4 +1,4 @@
-package com.joe.indoorlocalization;
+package com.joe.indoorlocalization.Calibration;
 
 import android.content.Intent;
 import android.graphics.Point;
@@ -17,16 +17,20 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.joe.indoorlocalization.CustomImageView;
+import com.joe.indoorlocalization.Options;
+import com.joe.indoorlocalization.R;
+import com.joe.indoorlocalization.ScanLogActivity;
+import com.joe.indoorlocalization.WifiScanner;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 
 
 public class CalibrationActivity extends AppCompatActivity {
@@ -40,11 +44,6 @@ public class CalibrationActivity extends AppCompatActivity {
     private ArrayAdapter<String> mAdapter;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
-
-    //static final String PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/fingerprints";
-
-    File PATH = Environment.getExternalStoragePublicDirectory(
-            Environment.getRootDirectory()+"/IndoorLocalization");
 
     private int floor = 1;
 
@@ -76,8 +75,6 @@ public class CalibrationActivity extends AppCompatActivity {
     }
 
     private void importIntoDatabase() {
-        // TODO
-        //fingerPrint.save();
     }
 
     private void saveIntoFile() {

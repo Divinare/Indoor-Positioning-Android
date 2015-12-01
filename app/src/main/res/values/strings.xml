@@ -61,6 +61,10 @@
     <string name="pref_title_vibrate">Vibrate</string>
 
 
+    <!-- Settings menu -->
+    <string name="menu_import_database">Import Database</string>
+    <string name="menu_export_database">Export Database</string>
+
     <!-- Calibration window -->
     <string name="btnSaveScan">Save scan</string>
     <string name="btnScanLog">Scan log</string>
@@ -80,5 +84,6 @@
 
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
+    <string name="title_activity_import_database">ImportDatabase</string>
 
 </resources>

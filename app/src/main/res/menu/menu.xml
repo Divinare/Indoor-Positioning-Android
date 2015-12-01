@@ -15,8 +15,11 @@
         android:id="@+id/menu_calibrate"
         android:title="Calibrate"/>
     <item
-        android:id="@+id/menu_setPosition"
-        android:title="Set Position"/>
+        android:id="@+id/menu_import_database"
+        android:title="@string/menu_import_database" />
+    <item
+        android:id="@+id/menu_export_database"
+        android:title="@string/menu_export_database" />
     <item
         android:id="@+id/menu_help"
         android:title="Help"/>

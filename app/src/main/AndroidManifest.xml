@@ -36,14 +36,14 @@
             android:value="" />
 
         <activity
-            android:name="com.joe.indoorlocalization.CalibrationActivity"
+            android:name=".Calibration.CalibrationActivity"
             android:label="@string/calibration"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="com.joe.indoorlocalization.LocateActivity"
-            android:label="@string/title_activity_locate">
+            android:name=".LocateActivity"
+            android:label="IndoorLocation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -51,9 +51,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.joe.indoorlocalization.ScanLogActivity"
-            android:label="@string/title_activity_scan_log">
-        </activity>
+            android:name=".ScanLogActivity"
+            android:label="@string/title_activity_scan_log"></activity>
+        <activity
+            android:name=".Calibration.ImportDatabase"
+            android:label="@string/title_activity_import_database"></activity>
     </application>
 
 </manifest>

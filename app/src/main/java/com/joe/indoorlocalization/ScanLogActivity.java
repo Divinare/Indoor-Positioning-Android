@@ -30,14 +30,15 @@ public class ScanLogActivity extends Activity {
 
         List<FingerPrint> fingerPrints = FingerPrint.listAll(FingerPrint.class);
         for(int i = 0; i < fingerPrints.size(); i++) {
-            float x = fingerPrints.get(i).getX();
-            float y = fingerPrints.get(i).getY();
-            float z = fingerPrints.get(i).getZ();
+            //float x = fingerPrints.get(i).getX();
+            //float y = fingerPrints.get(i).getY();
+            //float z = fingerPrints.get(i).getZ();
             //String macs = fingerPrints.get(i).getMacs();
             //String RSSIs = fingerPrints.get(i).getRSSIs();
             //String networks = fingerPrints.get(i).getNetworks();
 
             //Log.i(TAG, x + ", " + y + ", " + z + "\n" + macs + "\n" + RSSIs + "\n" + networks + "\n");
+          /*
             LinearLayout ll = new LinearLayout(this);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -61,6 +62,7 @@ public class ScanLogActivity extends Activity {
             });
             ll.addView(removeBtn, layoutParams);
             scanLogScrollView.addView(ll);
+            */
         }
 
     }

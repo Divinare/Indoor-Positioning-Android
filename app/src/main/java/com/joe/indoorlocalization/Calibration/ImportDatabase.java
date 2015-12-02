@@ -98,44 +98,43 @@ public class ImportDatabase extends ListActivity {
             Log.d(TAG, "Reading file from path " + o.getPath() + " failed!");
             Toast.makeText(this, "Reading file " + o.getName() + " failed.", Toast.LENGTH_SHORT).show();
         }
+        emptyDatabase();
         importIntoDatabase(fileContent, o.getName());
     }
 
-    private void importIntoDatabase(StringBuilder fileContent, String fileName) {
+    private void emptyDatabase() {
+        FingerPrint.deleteAll(FingerPrint.class);
+        Scan.deleteAll(Scan.class);
+        Log.d(TAG, "Database emptied");
+    }
 
+    private void importIntoDatabase(StringBuilder fileContent, String fileName) {
+        Log.d(TAG, "Importing into database " + fileName);
         String[] rows = fileContent.toString().split("\\n");
         for(String row: rows) {
             //Log.i(TAG, row);
             String[] array = row.split(";"); // Each row is now in a row array
-                Log.i(TAG, array[0]);
-                int z;
-                if(array[0].equals("0")) {
-                    z = 0;
-                } else {
-                    try {
-                        z = Integer.parseInt(array[0]);
-                    } catch(Exception e) {
-                        z = 0;
-                        Log.i(TAG, "AAA: " + array[0]);
-                        Log.i(TAG, "" + array.length);
-                        Log.i(TAG, "111: " + array[1]);
-                    };
-                }
+                int z = Integer.parseInt(array[0]);
                 float x = Float.parseFloat(array[1]);
                 float y = Float.parseFloat(array[2]);
 
                 Scan scan = new Scan(z, x, y);
+                scan.save();
                 List<FingerPrint> fingerPrints = new ArrayList<>();
 
-                for(int i = 3; i < array.length-1; i++) {
+                for(int i = 3; i < array.length-1; i=i+2) {
                     String mac = array[i]; // list goes mac;rssi;mac;rssi...
                     String RSSI = array[i+1];
-                    FingerPrint fp = new FingerPrint(mac, RSSI);
+                    Long scanId = scan.getId();
+                    Log.i(TAG, "" + scanId);
+                    FingerPrint fp = new FingerPrint(scanId, mac, RSSI);
+                    //Scan s = fp.getScan();
+                    //float test = s.getX();
+                    //Log.i(TAG, "" + test);
                     fp.save();
                     fingerPrints.add(fp);
                 }
-                scan.setFingerPrints(fingerPrints);
-                scan.save();
+
         }
 
         Toast.makeText(this, "File " + fileName + " imported to database succesfully.", Toast.LENGTH_SHORT).show();

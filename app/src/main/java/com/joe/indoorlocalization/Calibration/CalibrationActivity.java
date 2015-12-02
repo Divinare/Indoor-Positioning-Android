@@ -20,7 +20,6 @@ import android.widget.TextView;
 import com.joe.indoorlocalization.CustomImageView;
 import com.joe.indoorlocalization.Options;
 import com.joe.indoorlocalization.R;
-import com.joe.indoorlocalization.ScanLogActivity;
 import com.joe.indoorlocalization.WifiScanner;
 
 import java.io.BufferedReader;

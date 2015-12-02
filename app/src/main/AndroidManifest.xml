@@ -27,7 +27,7 @@
             android:value="records.db" />
         <meta-data
             android:name="VERSION"
-            android:value="7" />
+            android:value="9" />
         <meta-data
             android:name="QUERY_LOG"
             android:value="true" />
@@ -42,7 +42,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".LocateActivity"
+            android:name=".Locate.LocateActivity"
             android:label="IndoorLocation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -51,7 +51,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ScanLogActivity"
+            android:name=".Calibration.ScanLogActivity"
             android:label="@string/title_activity_scan_log"></activity>
         <activity
             android:name=".Calibration.ImportDatabase"

@@ -1,4 +1,4 @@
-package com.joe.indoorlocalization;
+package com.joe.indoorlocalization.Calibration;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -14,6 +14,8 @@ import android.widget.TextView;
 
 import com.joe.indoorlocalization.Calibration.CalibrationActivity;
 import com.joe.indoorlocalization.Models.FingerPrint;
+import com.joe.indoorlocalization.Options;
+import com.joe.indoorlocalization.R;
 
 import java.util.List;
 
@@ -33,11 +35,11 @@ public class ScanLogActivity extends Activity {
             //float x = fingerPrints.get(i).getX();
             //float y = fingerPrints.get(i).getY();
             //float z = fingerPrints.get(i).getZ();
-            //String macs = fingerPrints.get(i).getMacs();
-            //String RSSIs = fingerPrints.get(i).getRSSIs();
+            String mac = fingerPrints.get(i).getMac();
+            String RSSI = fingerPrints.get(i).getRSSI();
             //String networks = fingerPrints.get(i).getNetworks();
 
-            //Log.i(TAG, x + ", " + y + ", " + z + "\n" + macs + "\n" + RSSIs + "\n" + networks + "\n");
+            Log.i(TAG, mac + "\n" + RSSI + "\n");
           /*
             LinearLayout ll = new LinearLayout(this);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(

@@ -1,12 +1,12 @@
 package com.joe.indoorlocalization;
 
-import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.view.MenuItem;
 
 import com.joe.indoorlocalization.Calibration.CalibrationActivity;
 import com.joe.indoorlocalization.Calibration.ImportDatabase;
+import com.joe.indoorlocalization.Locate.LocateActivity;
 
 
 /**

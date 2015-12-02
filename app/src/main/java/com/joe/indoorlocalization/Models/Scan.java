@@ -7,13 +7,12 @@ import java.util.List;
 /**
  * Created by joe on 01/12/15.
  */
-public class Scan extends SugarRecord<FingerPrint> {
+public class Scan extends SugarRecord<Scan> {
 
     private float x;
     private float y;
     private int z;
     //private int timestamp;
-    private List<FingerPrint> fingerPrints;
 
     public Scan() {
 
@@ -35,9 +34,11 @@ public class Scan extends SugarRecord<FingerPrint> {
     public float getY() {
         return this.y;
     }
+
     public List<FingerPrint> getFingerPrints() {
-        return this.fingerPrints;
+        return FingerPrint.find(FingerPrint.class, "scan = ?", "" + this.getId());
     }
+
     public void setZ(int z) {
         this.z = z;
     }
@@ -46,9 +47,5 @@ public class Scan extends SugarRecord<FingerPrint> {
     }
     public void setY(float y) {
         this.y = y;
-    }
-
-    public void setFingerPrints(List<FingerPrint> fingerPrints) {
-        this.fingerPrints = fingerPrints;
     }
 }

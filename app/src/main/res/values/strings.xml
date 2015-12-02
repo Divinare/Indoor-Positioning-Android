@@ -65,6 +65,9 @@
     <string name="menu_import_database">Import Database</string>
     <string name="menu_export_database">Export Database</string>
 
+    <!-- Locate window -->
+    <string name="btnGetLocation">Get Location</string>
+
     <!-- Calibration window -->
     <string name="btnSaveScan">Save scan</string>
     <string name="btnScanLog">Scan log</string>

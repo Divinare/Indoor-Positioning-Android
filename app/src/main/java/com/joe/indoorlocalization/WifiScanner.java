@@ -25,24 +25,25 @@ public abstract class WifiScanner extends AppCompatActivity {
     static String TAG = WifiScanner.class.getSimpleName();
 
     //WiFi tools
-    static PowerManager.WakeLock wakeLock;
-    WifiManager mainWifi;
-    WifiReceiver receiverWifi;
-    List<ScanResult> wifiList;
+    protected static PowerManager.WakeLock wakeLock;
+    protected WifiManager mainWifi;
+    protected WifiReceiver receiverWifi;
+    protected List<ScanResult> wifiList;
 
-    //The maximum number of fingerprints we want to record (for a ballpark figure, assume approx. 1 fingerprint/second on current Android devices)
-    static final int MAXPRINTS = 5;
+    protected int maxScans = 1;
 
     //True while training is in process
     boolean running = false;
     //Grid cell as indicated by the user's selection in the gridview
     static int position = 0;
     //Asynchronous task (thread). We capture the initialization so we can control it after it's started
-    AsyncTask<Integer, String, Hashtable<String, List<Integer>>> task = new RecordFingerprints();
+
+    //AsyncTask<Integer, String, Hashtable<String, List<Integer>>> task = new RecordFingerprints();
+
     //Popup dialog that displays progress (also helps detect if the user has aborted the training process)
-    static ProgressDialog progressDialog;
-    static StringBuilder fingerPrintData; // mac;rssi;mac;rssi... format
-    static StringBuilder networks;
+    protected ProgressDialog progressDialog;
+    protected StringBuilder fingerPrintData; // mac;rssi;mac;rssi... format
+    protected StringBuilder networks;
 
     //private Context context;
 
@@ -60,28 +61,22 @@ public abstract class WifiScanner extends AppCompatActivity {
         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         progressDialog.setCancelable(true);
         progressDialog.setTitle("RECORDING");
-        progressDialog.setMax(MAXPRINTS);
+        progressDialog.setMax(maxScans);
     }
 
     public void startScan() {
         Log.d(TAG, "scan started!");
         //Task has been initialized but not run a single time yet
-        if(task.getStatus()== AsyncTask.Status.PENDING){
+            mainWifi.startScan();
+
+
             //Show the progress dialog
             progressDialog.setTitle("TRAINING CELL "+position);
             progressDialog.show();
             //Start the recording
-            task.execute(position);
 
-        }
         //Task has been allowed to finish
-        if(task.getStatus()== AsyncTask.Status.FINISHED) {
             //Re-initialize
-            task = new RecordFingerprints();
-            progressDialog.setTitle("TRAINING CELL " + position);
-            progressDialog.show();
-            task.execute(position);
-        }
     }
 
     protected void onPause() {
@@ -124,10 +119,19 @@ public abstract class WifiScanner extends AppCompatActivity {
 
                 mainWifi.startScan();
                 Log.d("FINGER","Scan initiated");
+            } else {
+                try {
+                    unregisterReceiver(receiverWifi);
+                } catch(Exception e) {
+                    Log.e(TAG, "couldn't unregister receiver");
+                }
+
+
             }
 
         }
     }
+    /*
 
     //Asynchronous task runs in background so we don't make the UI wait
     private class RecordFingerprints extends AsyncTask<Integer, String, Hashtable<String,List<Integer>>> {
@@ -144,7 +148,7 @@ public abstract class WifiScanner extends AppCompatActivity {
                 if (!progressDialog.isShowing() || progressDialog.getProgress() >= progressDialog.getMax()) {
                     //Log.d(TAG, fingerprint.toString());
                     Log.d(TAG, "at progress dialog running method");
-                    /*
+
                     File file = new File(PATH, "/fingerprints/"+params[0]+".txt");
                     try{
                         OutputStream os = new FileOutputStream(file,false);
@@ -154,7 +158,7 @@ public abstract class WifiScanner extends AppCompatActivity {
                     catch(Exception e){Log.d("HELP","Need somebody");}
                     progressDialog.dismiss();
                     return null;
-                    */
+
                 } else {
                     publishProgress("");
                 }
@@ -187,5 +191,13 @@ public abstract class WifiScanner extends AppCompatActivity {
             running = false;
             return;
         }
+    }
+    */
+
+    public StringBuilder getFingerPrintData() {
+        return this.fingerPrintData;
+    }
+    public StringBuilder getNetworks() {
+        return this.networks;
     }
 }

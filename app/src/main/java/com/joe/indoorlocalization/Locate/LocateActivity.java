@@ -1,6 +1,14 @@
 package com.joe.indoorlocalization.Locate;
 
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -34,9 +42,21 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class LocateActivity extends WifiScanner {
+public class LocateActivity extends AppCompatActivity {
 
     static String TAG = LocateActivity.class.getSimpleName();
+
+    //WiFi tools
+    private static PowerManager.WakeLock wakeLock;
+    private WifiManager mainWifi;
+    private WifiReceiver receiverWifi;
+    private List<ScanResult> wifiList;
+
+    private int maxScans = 1;
+    private ProgressDialog progressDialog;
+    private StringBuilder fingerPrintData; // mac;rssi;mac;rssi... format
+    private StringBuilder networks;
+
     Drawer drawer = new Drawer(this);
 
     @Override
@@ -49,15 +69,74 @@ public class LocateActivity extends WifiScanner {
 
         drawer.initDrawer("locate", this);
 
+        mainWifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
+        PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
+        wakeLock = pm.newWakeLock(
+                PowerManager.SCREEN_DIM_WAKE_LOCK, "My wakelock");
+        receiverWifi = new WifiReceiver();
+        this.registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        progressDialog= new ProgressDialog(this);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        progressDialog.setCancelable(true);
+        progressDialog.setTitle("RECORDING");
+        progressDialog.setMax(maxScans);
 
+        mainWifi.startScan();
         Log.i(TAG, "The app is running :)))");
     }
 
-
-    public void getLocation(View v) {
-        //startScan();
-
+    protected void onPause() {
+        unregisterReceiver(receiverWifi);
+        super.onPause();
     }
+
+    protected void onResume() {
+        registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        super.onResume();
+    }
+
+    class WifiReceiver extends BroadcastReceiver {
+
+        /*
+        What to do when our BroadcastReceiver (or in this case, the WifiReceiver that implements it) returns its result
+         */
+        public void onReceive(Context c, Intent intent) {
+            Log.d("FINGER","Scan received");
+
+            fingerPrintData = new StringBuilder();
+            networks = new StringBuilder();
+
+            if (progressDialog.getProgress()<=progressDialog.getMax()) {
+                wifiList = mainWifi.getScanResults();
+
+                for(int j=0; j<wifiList.size(); j++) {
+
+                    if(wifiList.get(j).level != 0) {
+                        fingerPrintData.append(wifiList.get(j).BSSID);
+                        fingerPrintData.append(';');
+                        fingerPrintData.append(wifiList.get(j).level);
+                        if (j < wifiList.size() - 1) {
+                            fingerPrintData.append(";");
+                        }
+                    }
+                }
+                calcLocation();
+                progressDialog.incrementProgressBy(1);
+
+                mainWifi.startScan();
+                Log.d("FINGER","Scan initiated");
+            } else {
+                try {
+                    unregisterReceiver(receiverWifi);
+                } catch(Exception e) {
+                    Log.e(TAG, "couldn't unregister receiver");
+                }
+            }
+        }
+    }
+
+
+
 
     public static String[] Load(File file)
     {
@@ -104,15 +183,20 @@ public class LocateActivity extends WifiScanner {
     }
 
 
-    public void calcLocation() {
 
-        Log.d(TAG, "at getLocation");
+    public void calcLocation() {
+        Log.d(TAG, "at calcLocation");
+
+        String currentFP = fingerPrintData.toString();
+
+        Log.d(TAG, currentFP.toString());
+
 
         // Expected: 2;1773.0;1776.0
         //String currentFP = "d8:b1:90:41:8a:3c;-76;00:3a:98:b9:9c:cb;-69;d8:b1:90:41:8a:3e;-73;84:b8:02:e2:a1:4c;-75;00:1d:e6:27:14:c1;-75;d8:b1:90:41:8a:3f;-74;00:3a:98:b9:9c:cd;-69;d8:b1:90:41:8a:32;-66;d8:b1:90:41:8a:30;-66;d8:b1:90:41:8a:33;-75;00:3a:98:b9:9c:ce;-69;00:3a:98:b9:9c:cc;-69;d8:b1:90:41:8a:3d;-76;d8:b1:90:41:8a:3b;-76;b0:aa:77:9f:14:43;-74;00:1d:e6:27:14:c2;-72;b0:aa:77:9f:14:40;-74;d8:b1:90:3c:83:4f;-75;d8:b1:90:3c:83:4e;-75;00:1d:e6:27:14:cd;-83;00:1d:e6:27:14:c3;-72;56:25:8d:aa:da:a8;-76;d8:b1:90:3c:83:4d;-75;d8:b1:90:3c:83:4b;-74;d8:b1:90:3c:83:4c;-74;b0:aa:77:9f:14:42;-74;b0:aa:77:9f:14:4d;-74;02:1a:11:f6:80:c2;-70;34:21:09:14:de:60;-67;00:3a:98:b9:9c:cf;-69;84:b8:02:e2:a1:4e;-79;84:b8:02:e2:a1:4d;-76;d8:b1:90:41:8d:22;-75;d8:b1:90:41:8d:23;-76;d8:b1:90:41:8d:21;-76;84:b8:02:e2:a5:9c;-77;84:b8:02:e2:a5:9b;-75;d8:b1:90:41:8d:20;-75;84:b8:02:e2:a5:9d;-77;d8:b1:90:41:8d:2d;-78;d8:b1:90:45:18:de;-90;b0:aa:77:9f:14:4b;-76;84:b8:02:e2:a5:9f;-75;84:b8:02:e2:a1:4f;-77;d8:b1:90:41:8d:2b;-78;00:1d:e6:27:14:ce;-83;5c:f8:a1:9e:dc:3e;-68;84:b8:02:e2:a5:90;-78;00:1d:e6:27:14:cc;-83;00:1d:e6:27:14:cf;-77;b0:aa:77:9f:14:4e;-74;00:1d:e6:27:14:cb;-83;b0:aa:77:a8:cf:ec;-84;58:97:bd:62:03:93;-84;84:b8:02:e2:a5:9e;-76;d8:b1:90:41:8a:31;-76;84:b8:02:e2:a5:92;-80;b0:aa:77:a8:cf:ed;-82;34:62:88:ea:0b:2d;-88;b0:aa:77:a8:cf:ee;-82;58:97:bd:62:03:9d;-85;b0:aa:77:a8:b5:82;-90;b0:aa:77:a8:cf:eb;-81;b0:aa:77:a8:cf:ef;-84;34:62:88:ea:0b:2f;-89;34:62:88:ea:0b:2b;-87;34:62:88:ea:0b:2c;-88;58:97:bd:62:03:9c;-85;b0:aa:77:a8:b5:80;-90;b0:aa:77:a8:b5:83;-90;d8:b1:90:41:8d:2e;-81;84:b8:02:e2:a5:91;-77;b0:aa:77:9f:12:cd;-89;58:97:bd:62:03:91;-89;d8:b1:90:41:8d:2c;-79;58:97:bd:6e:b0:bc;-89;84:b8:02:e2:a5:93;-78;00:1d:e6:27:14:c0;-70;b0:aa:77:9f:14:4c;-74;58:97:bd:62:03:90;-83;b0:aa:77:9f:12:cb;-89;34:62:88:ea:0b:22;-84;58:97:bd:6e:b0:bd;-90;b0:aa:77:cc:d3:e2;-88;b0:aa:77:9f:14:4f;-74;d8:b1:90:41:8d:2f;-76;34:62:88:ea:0b:23;-84;b0:aa:77:cc:d3:ec;-85;b0:aa:77:9f:12:cc;-91;58:97:bd:6e:b0:b3;-86;d8:b1:90:3c:76:03;-88;58:97:bd:6e:b0:bb;-92;58:97:bd:62:03:92;-84;d8:b1:90:3c:76:0e;-91;b0:aa:77:9f:12:cf;-87;58:97:bd:6e:b0:bf;-90;b0:aa:77:cc:d3:e0;-89";
 
         // Expected: 2;1404.0;1770.0
-        String currentFP = "d8:b1:90:41:8a:3c;-68;00:3a:98:b9:9c:cb;-61;d8:b1:90:41:8a:3e;-68;84:b8:02:e2:a1:4c;-72;00:1d:e6:27:14:c1;-85;d8:b1:90:41:8a:3f;-67;00:3a:98:b9:9c:cd;-61;d8:b1:90:41:8a:32;-66;d8:b1:90:41:8a:30;-65;d8:b1:90:41:8a:33;-66;00:3a:98:b9:9c:ce;-62;00:3a:98:b9:9c:cc;-61;d8:b1:90:41:8a:3d;-68;d8:b1:90:41:8a:3b;-67;b0:aa:77:9f:14:43;-73;00:1d:e6:27:14:c2;-73;b0:aa:77:9f:14:40;-74;d8:b1:90:3c:83:4f;-74;d8:b1:90:3c:83:4e;-75;00:1d:e6:27:14:c3;-71;56:25:8d:aa:da:a8;-78;d8:b1:90:3c:83:4d;-75;d8:b1:90:3c:83:4b;-74;d8:b1:90:3c:83:4c;-74;b0:aa:77:9f:14:42;-74;02:1a:11:f6:80:c2;-68;34:21:09:14:de:60;-67;00:3a:98:b9:9c:cf;-63;d8:b1:90:41:8d:22;-77;d8:b1:90:41:8d:23;-76;84:b8:02:e2:a5:9c;-72;d8:b1:90:41:8d:20;-77;84:b8:02:e2:a5:90;-72;00:1d:e6:27:14:cc;-77;00:1d:e6:27:14:cf;-77;00:1d:e6:27:14:cb;-77;b0:aa:77:a8:cf:ec;-83;84:b8:02:e2:a5:9e;-73;84:b8:02:e2:a5:92;-73;b0:aa:77:a8:cf:ef;-84;d8:b1:90:41:8d:2c;-76;84:b8:02:e2:a5:93;-71;b0:aa:77:9f:14:4c;-71;58:97:bd:62:03:90;-84;b0:aa:77:cc:d3:e0;-82;34:62:88:ea:0b:20;-84;b0:aa:77:a8:b5:82;-88;84:b8:02:e2:a5:9b;-76;00:1d:e6:27:14:cd;-77;00:1d:e6:27:14:ce;-77;b0:aa:77:a8:a0:32;-87;b0:aa:77:9f:12:cf;-90;d8:b1:90:41:8d:2d;-72;b0:aa:77:a8:cf:ee;-84;b0:aa:77:a8:cf:ed;-85;d8:b1:90:41:8d:2f;-76;b0:aa:77:a8:cf:eb;-84;b0:aa:77:a8:a0:33;-88;b0:aa:77:cc:d3:ee;-88;d8:b1:90:45:18:dd;-88;b0:aa:77:9f:12:ce;-91;58:97:bd:62:03:9d;-88;88:32:9b:a1:96:9c;-91;b0:aa:77:9f:14:4b;-71;84:b8:02:e2:a1:4b;-81;84:b8:02:e2:a1:4f;-80;b0:aa:77:9f:14:4e;-72;b0:aa:77:9f:14:4d;-73;d8:b1:90:41:8a:31;-69;84:b8:02:e2:a1:4d;-83;b0:aa:77:9f:12:cd;-90;d8:b1:90:3c:7e:8d;-92;58:97:bd:62:03:92;-84;b0:aa:77:9f:14:4f;-71;d8:b1:90:41:8d:2b;-72;84:b8:02:e2:a5:9f;-76;58:97:bd:62:03:9c;-89;b0:aa:77:9f:12:cc;-90;d8:b1:90:3c:7e:8c;-92;b0:aa:77:9f:12:cb;-91;d8:b1:90:3c:7e:8b;-91;b0:aa:77:a8:b5:83;-86;58:97:bd:62:03:93;-87;d8:b1:90:3c:7e:8f;-90;34:62:88:ea:0b:2d;-87;b0:aa:77:a8:bb:1e;-90;f4:cf:e2:62:da:1e;-91;d8:b1:90:3c:76:92;-89;34:62:88:ea:0b:2f;-88;34:62:88:ea:0b:2c;-88;34:62:88:ea:0b:2b;-89;f4:cf:e2:66:a8:cc;-91;d8:b1:90:3c:76:93;-90";
+       // String currentFP = "d8:b1:90:41:8a:3c;-68;00:3a:98:b9:9c:cb;-61;d8:b1:90:41:8a:3e;-68;84:b8:02:e2:a1:4c;-72;00:1d:e6:27:14:c1;-85;d8:b1:90:41:8a:3f;-67;00:3a:98:b9:9c:cd;-61;d8:b1:90:41:8a:32;-66;d8:b1:90:41:8a:30;-65;d8:b1:90:41:8a:33;-66;00:3a:98:b9:9c:ce;-62;00:3a:98:b9:9c:cc;-61;d8:b1:90:41:8a:3d;-68;d8:b1:90:41:8a:3b;-67;b0:aa:77:9f:14:43;-73;00:1d:e6:27:14:c2;-73;b0:aa:77:9f:14:40;-74;d8:b1:90:3c:83:4f;-74;d8:b1:90:3c:83:4e;-75;00:1d:e6:27:14:c3;-71;56:25:8d:aa:da:a8;-78;d8:b1:90:3c:83:4d;-75;d8:b1:90:3c:83:4b;-74;d8:b1:90:3c:83:4c;-74;b0:aa:77:9f:14:42;-74;02:1a:11:f6:80:c2;-68;34:21:09:14:de:60;-67;00:3a:98:b9:9c:cf;-63;d8:b1:90:41:8d:22;-77;d8:b1:90:41:8d:23;-76;84:b8:02:e2:a5:9c;-72;d8:b1:90:41:8d:20;-77;84:b8:02:e2:a5:90;-72;00:1d:e6:27:14:cc;-77;00:1d:e6:27:14:cf;-77;00:1d:e6:27:14:cb;-77;b0:aa:77:a8:cf:ec;-83;84:b8:02:e2:a5:9e;-73;84:b8:02:e2:a5:92;-73;b0:aa:77:a8:cf:ef;-84;d8:b1:90:41:8d:2c;-76;84:b8:02:e2:a5:93;-71;b0:aa:77:9f:14:4c;-71;58:97:bd:62:03:90;-84;b0:aa:77:cc:d3:e0;-82;34:62:88:ea:0b:20;-84;b0:aa:77:a8:b5:82;-88;84:b8:02:e2:a5:9b;-76;00:1d:e6:27:14:cd;-77;00:1d:e6:27:14:ce;-77;b0:aa:77:a8:a0:32;-87;b0:aa:77:9f:12:cf;-90;d8:b1:90:41:8d:2d;-72;b0:aa:77:a8:cf:ee;-84;b0:aa:77:a8:cf:ed;-85;d8:b1:90:41:8d:2f;-76;b0:aa:77:a8:cf:eb;-84;b0:aa:77:a8:a0:33;-88;b0:aa:77:cc:d3:ee;-88;d8:b1:90:45:18:dd;-88;b0:aa:77:9f:12:ce;-91;58:97:bd:62:03:9d;-88;88:32:9b:a1:96:9c;-91;b0:aa:77:9f:14:4b;-71;84:b8:02:e2:a1:4b;-81;84:b8:02:e2:a1:4f;-80;b0:aa:77:9f:14:4e;-72;b0:aa:77:9f:14:4d;-73;d8:b1:90:41:8a:31;-69;84:b8:02:e2:a1:4d;-83;b0:aa:77:9f:12:cd;-90;d8:b1:90:3c:7e:8d;-92;58:97:bd:62:03:92;-84;b0:aa:77:9f:14:4f;-71;d8:b1:90:41:8d:2b;-72;84:b8:02:e2:a5:9f;-76;58:97:bd:62:03:9c;-89;b0:aa:77:9f:12:cc;-90;d8:b1:90:3c:7e:8c;-92;b0:aa:77:9f:12:cb;-91;d8:b1:90:3c:7e:8b;-91;b0:aa:77:a8:b5:83;-86;58:97:bd:62:03:93;-87;d8:b1:90:3c:7e:8f;-90;34:62:88:ea:0b:2d;-87;b0:aa:77:a8:bb:1e;-90;f4:cf:e2:62:da:1e;-91;d8:b1:90:3c:76:92;-89;34:62:88:ea:0b:2f;-88;34:62:88:ea:0b:2c;-88;34:62:88:ea:0b:2b;-89;f4:cf:e2:66:a8:cc;-91;d8:b1:90:3c:76:93;-90";
 
         // Expected: 1;1466.0;1758.0
         //String currentFP = "d8:b1:90:3c:83:4d;-71;d8:b1:90:3c:83:4e;-71;58:97:bd:62:03:92;-79;d8:b1:90:3c:83:4c;-71;d8:b1:90:3c:83:4b;-71;58:97:bd:62:03:90;-80;58:97:bd:62:03:9c;-85;02:1a:11:f6:80:c2;-73;34:21:09:14:de:60;-65;00:3a:98:b9:9c:ce;-68;00:3a:98:b9:9c:cc;-68;d8:b1:90:41:8a:3c;-67;00:3a:98:b9:9c:cb;-68;00:3a:98:b9:9c:cd;-67;84:b8:02:e2:a1:4d;-66;d8:b1:90:41:8a:3e;-67;00:3a:98:b9:9c:cf;-68;84:b8:02:e2:a1:4b;-67;84:b8:02:e2:a1:4c;-67;b0:aa:77:a8:cf:ec;-82;b0:aa:77:9f:14:4c;-76;d8:b1:90:41:8d:2d;-85;5c:f8:a1:9e:dc:3e;-84;84:b8:02:e2:a5:9c;-77;d8:b1:90:41:8a:30;-71;d8:b1:90:41:8d:2c;-80;00:1d:e6:27:14:cb;-79;d8:b1:90:41:8a:32;-69;b0:aa:77:9f:14:4e;-78;84:b8:02:e2:a5:9e;-79;b0:aa:77:9f:14:42;-75;d8:b1:90:41:8a:33;-69;d8:b1:90:41:8d:2b;-81;00:1d:e6:27:14:c3;-72;b0:aa:77:9f:14:40;-75;84:b8:02:e2:a5:9d;-80;56:25:8d:aa:da:a8;-74;00:1d:e6:27:14:c2;-78;00:1d:e6:27:14:c1;-76;b0:aa:77:a8:cf:ee;-84;d8:b1:90:41:8d:2e;-81;58:97:bd:6e:b0:b0;-86;b0:aa:77:9f:14:4d;-77;84:b8:02:e2:a1:4f;-69;58:97:bd:6e:b0:b3;-84;d8:b1:90:3c:76:00;-82;d8:b1:90:3c:76:03;-87;d8:b1:90:3c:76:02;-85;88:32:9b:a1:96:9c;-86;b0:aa:77:9f:12:cc;-84;84:b8:02:e2:a1:4e;-67;d8:b1:90:3c:83:4f;-71;00:1d:e6:27:14:cd;-79;b0:aa:77:a8:b5:82;-76;d8:b1:90:41:8a:3f;-67;84:b8:02:e2:a5:9f;-78;b0:aa:77:a8:b5:83;-77;d8:b1:90:41:8a:3d;-67;00:1d:e6:27:14:ce;-81;58:97:bd:6e:b0:bd;-86;d8:b1:90:41:8a:3b;-67;00:1d:e6:27:14:cc;-80;84:b8:02:e2:a5:93;-78;b0:aa:77:9f:14:43;-74;d8:b1:90:41:8d:22;-80;58:97:bd:6e:b0:bc;-87;84:b8:02:e2:a5:92;-78;58:97:bd:62:03:9d;-82;58:97:bd:62:03:93;-76;d8:b1:90:41:8d:20;-79;d8:b1:90:41:8d:23;-77;00:1d:e6:27:14:cf;-78;b0:aa:77:a8:cf:ed;-82;b0:aa:77:9f:14:4f;-77;58:97:bd:62:03:91;-77;58:97:bd:6e:b0:b1;-83;58:97:bd:6e:b0:be;-87;84:b8:02:e2:a5:91;-91;84:b8:02:e2:a5:9b;-81;b0:aa:77:a8:b5:80;-75;58:97:bd:62:03:9f;-85;58:97:bd:62:03:9e;-83;b0:aa:77:9f:12:cd;-84;b0:aa:77:9f:12:ce;-84;d8:b1:90:3c:76:0e;-88;b0:aa:77:9f:14:4b;-76;b0:aa:77:a8:cf:eb;-83;b0:aa:77:9f:12:cb;-88;58:97:bd:6e:b0:bf;-89;54:4a:00:2a:d4:2c;-88;b0:aa:77:9f:14:41;-74;00:1d:e6:27:14:c0;-74;b0:aa:77:9f:12:cf;-85;b0:aa:77:a8:b5:8f;-91";

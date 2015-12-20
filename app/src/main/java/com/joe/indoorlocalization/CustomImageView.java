@@ -10,6 +10,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
@@ -39,8 +40,8 @@ public class CustomImageView extends ImageView {
     protected float origWidth, origHeight;
     int oldMeasuredWidth, oldMeasuredHeight;
     ScaleGestureDetector mScaleDetector;
+    ScaleListener scaleListener;
     Context context;
-
 
     public CustomImageView(Context context) {
         super(context);
@@ -66,7 +67,8 @@ public class CustomImageView extends ImageView {
     private void sharedConstructing(Context context) {
         super.setClickable(true);
         this.context = context;
-        mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
+        scaleListener = new ScaleListener();
+        mScaleDetector = new ScaleGestureDetector(context, scaleListener);
         matrix = new Matrix();
         m = new float[9];
         setImageMatrix(matrix);
@@ -236,6 +238,7 @@ public class CustomImageView extends ImageView {
             return;
         oldMeasuredHeight = viewHeight;
         oldMeasuredWidth = viewWidth;
+
         if (saveScale == 1) {
             //Fit to screen.
             float scale;
@@ -265,4 +268,5 @@ public class CustomImageView extends ImageView {
     public Point getLastPoint() {
         return translateCoordinates(last);
     }
+
 } 

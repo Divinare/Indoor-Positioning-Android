@@ -82,7 +82,7 @@ public class Drawer extends AppCompatActivity {
             Log.d(TAG, "ddd " + d);
         }
 
-        mAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, drawerListNames);
+        mAdapter = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, drawerListNames);
         mDrawerList.setAdapter(mAdapter);
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
         Log.i(TAG, "selected items set");

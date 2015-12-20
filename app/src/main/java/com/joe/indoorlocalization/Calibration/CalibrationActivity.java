@@ -3,6 +3,7 @@ package com.joe.indoorlocalization.Calibration;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Point;
@@ -45,12 +46,24 @@ import java.util.Hashtable;
 import java.util.List;
 
 
-public class CalibrationActivity extends WifiScanner {
+public class CalibrationActivity extends AppCompatActivity {
 
     static String TAG = CalibrationActivity.class.getSimpleName();
 
     Drawer drawer = new Drawer(this);
     private CustomImageView customImageView;
+
+
+    //WiFi tools
+    private static PowerManager.WakeLock wakeLock;
+    private WifiManager mainWifi;
+    private WifiReceiver receiverWifi;
+    private List<ScanResult> wifiList;
+
+    private int maxScans = 1;
+    private ProgressDialog progressDialog;
+    private StringBuilder fingerPrintData; // mac;rssi;mac;rssi... format
+    private StringBuilder networks;
 
 
     @Override
@@ -68,13 +81,108 @@ public class CalibrationActivity extends WifiScanner {
 
         drawer.initDrawer("calibration", this);
 
+        mainWifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
+        PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
+        wakeLock = pm.newWakeLock(
+                PowerManager.SCREEN_DIM_WAKE_LOCK, "My wakelock");
+        receiverWifi = new WifiReceiver();
+        this.registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        progressDialog= new ProgressDialog(this);
+        setupProgressDialog();
+
     }
+
+    protected void onPause() {
+        unregisterReceiver(receiverWifi);
+        super.onPause();
+    }
+
+    protected void onResume() {
+        registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        super.onResume();
+    }
+
+    class WifiReceiver extends BroadcastReceiver {
+
+        /*
+        What to do when our BroadcastReceiver (or in this case, the WifiReceiver that implements it) returns its result
+         */
+        public void onReceive(Context c, Intent intent) {
+            Log.d("FINGER","Scan received");
+
+            fingerPrintData = new StringBuilder();
+            networks = new StringBuilder();
+
+            if (progressDialog.getProgress()<=progressDialog.getMax()) {
+                wifiList = mainWifi.getScanResults();
+
+                for(int j=0; j<wifiList.size(); j++) {
+
+                    if(wifiList.get(j).level != 0) {
+                        fingerPrintData.append(wifiList.get(j).BSSID);
+                        fingerPrintData.append(';');
+                        fingerPrintData.append(wifiList.get(j).level);
+                        if (j < wifiList.size() - 1) {
+                            fingerPrintData.append(";");
+                        }
+                    }
+                }
+
+                progressDialog.incrementProgressBy(1);
+
+                mainWifi.startScan();
+                Log.d("FINGER","Scan initiated");
+            } else {
+                try {
+                    unregisterReceiver(receiverWifi);
+                } catch(Exception e) {
+                    Log.e(TAG, "couldn't unregister receiver");
+                }
+            }
+        }
+    }
+
+
+
 
     public void saveRecord(View v) {
         startScan();
         //wifiScanner.startScan();
         //saveIntoFile();
 
+    }
+
+    public void startScan() {
+        Log.d(TAG, "scan started!");
+        mainWifi.startScan();
+        progressDialog.setTitle("Training");
+        progressDialog.show();
+
+    }
+
+    public void setupProgressDialog() {
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        progressDialog.setCancelable(true);
+        progressDialog.setTitle("Recording");
+        progressDialog.setMax(maxScans);
+
+        progressDialog.setButton(ProgressDialog.BUTTON_POSITIVE, "Save", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                // Toast.makeText(CalibrationActivity.this, "Saving " + prints.size() + " fingerprints...", Toast.LENGTH_SHORT).show();
+                //savePrints();
+            }
+        });
+        progressDialog.setButton(ProgressDialog.BUTTON_NEUTRAL, "View", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                progressDialog.dismiss();
+                //showScanResults(prints);
+            }
+        });
+        progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, "Dismiss", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                progressDialog.dismiss();
+            }
+        });
     }
 
     private void saveIntoFile(StringBuilder fingerPrintData) {

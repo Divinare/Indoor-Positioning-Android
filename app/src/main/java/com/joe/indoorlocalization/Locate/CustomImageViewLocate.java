@@ -1,9 +1,12 @@
-package com.joe.indoorlocalization;
+package com.joe.indoorlocalization.Locate;
 
 import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.TextView;
+
+import com.joe.indoorlocalization.CustomImageView;
+import com.joe.indoorlocalization.R;
 
 
 /**

@@ -7,7 +7,7 @@ import com.orm.SugarRecord;
  */
 public class FingerPrint extends SugarRecord<FingerPrint> {
 
-    private Long scanId;
+    private Scan scan;
     private String mac;
     private String RSSI;
     private String network;
@@ -16,21 +16,21 @@ public class FingerPrint extends SugarRecord<FingerPrint> {
 
     }
 
-    public FingerPrint(Long scanId, String mac, String RSSI) {
-        this.scanId = scanId;
+    public FingerPrint(Scan scan, String mac, String RSSI) {
+        this.scan = scan;
         this.mac = mac;
         this.RSSI = RSSI;
     }
 
-    public FingerPrint(Long scanId, String mac, String RSSI, String network) {
-        this.scanId = scanId;
+    public FingerPrint(Scan scan, String mac, String RSSI, String network) {
+        this.scan = scan;
         this.mac = mac;
         this.RSSI = RSSI;
         this.network = network;
     }
 
-    public Long getScanId() {
-        return this.scanId;
+    public Scan getScan() {
+        return this.scan;
     }
     public String getMac() {
         return this.mac;
@@ -41,8 +41,8 @@ public class FingerPrint extends SugarRecord<FingerPrint> {
     public String getNetwork() {
         return this.network;
     };
-    public void setScanId(Long scanId) {
-        this.scanId = scanId;
+    public void setScan(Scan scan) {
+        this.scan = scan;
     }
     public void setMacs(String mac) {
         this.mac = mac;

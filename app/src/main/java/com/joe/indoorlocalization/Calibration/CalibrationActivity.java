@@ -1,9 +1,17 @@
 package com.joe.indoorlocalization.Calibration;
 
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Point;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.PowerManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -21,6 +29,7 @@ import com.joe.indoorlocalization.CustomImageView;
 import com.joe.indoorlocalization.Options;
 import com.joe.indoorlocalization.R;
 import com.joe.indoorlocalization.WifiScanner;
+import com.joe.indoorlocalization.WifiScannerOld;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -30,14 +39,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
 
 
-public class CalibrationActivity extends AppCompatActivity {
+public class CalibrationActivity extends WifiScanner {
 
     static String TAG = CalibrationActivity.class.getSimpleName();
 
     private CustomImageView customImageView;
-    private WifiScanner wifiScanner;
+    private WifiScannerOld wifiScanner;
 
     private ListView mDrawerList;
     private ArrayAdapter<String> mAdapter;
@@ -47,16 +59,13 @@ public class CalibrationActivity extends AppCompatActivity {
     private int floor = 1;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calibration);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         customImageView = (CustomImageView) findViewById(R.id.customImageViewCalibrate);
-
-        wifiScanner = new WifiScanner(this);
-        wifiScanner.start();
 
         mDrawerList = (ListView)findViewById(R.id.navList);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout_calibration);
@@ -68,15 +77,13 @@ public class CalibrationActivity extends AppCompatActivity {
     }
 
     public void saveRecord(View v) {
+        startScan();
         //wifiScanner.startScan();
-        saveIntoFile();
+        //saveIntoFile();
 
     }
 
-    private void importIntoDatabase() {
-    }
-
-    private void saveIntoFile() {
+    private void saveIntoFile(StringBuilder fingerPrintData) {
         String fileName = "dataJoe.txt";
 
         File file = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), fileName);
@@ -88,7 +95,7 @@ public class CalibrationActivity extends AppCompatActivity {
         Log.i(TAG, "Trying to save file...");
 
 
-        StringBuilder fingerPrintData = wifiScanner.getFingerPrintData();
+        //StringBuilder fingerPrintData = wifiScanner.getFingerPrintData();
         Point point = customImageView.getLastPoint();
         float x = point.x;
         float y = point.y;
@@ -111,95 +118,11 @@ public class CalibrationActivity extends AppCompatActivity {
         }
     }
 
-
-
-
-    public static void Save(File file, String[] data)
-    {
-        FileOutputStream fos = null;
-        try
-        {
-            Log.d(TAG, "Created fileOutputStream");
-            fos = new FileOutputStream(file);
-            Log.d(TAG, "" + fos);
-        }
-        catch (FileNotFoundException e) {e.printStackTrace();}
-        try
-        {
-            try
-            {
-                for (int i = 0; i<data.length; i++)
-                {
-                    fos.write(data[i].getBytes());
-                    if (i < data.length-1)
-                    {
-                        fos.write("\n".getBytes());
-                    }
-                }
-            }
-            catch (IOException e) {e.printStackTrace();}
-        }
-        finally
-        {
-            try
-            {
-                fos.close();
-            }
-            catch (IOException e) {e.printStackTrace();}
-        }
-    }
-
-
-    public static String[] Load(File file)
-    {
-        FileInputStream fis = null;
-        try
-        {
-            fis = new FileInputStream(file);
-        }
-        catch (FileNotFoundException e) {e.printStackTrace();}
-        InputStreamReader isr = new InputStreamReader(fis);
-        BufferedReader br = new BufferedReader(isr);
-
-        String test;
-        int anzahl=0;
-        try
-        {
-            while ((test=br.readLine()) != null)
-            {
-                anzahl++;
-            }
-        }
-        catch (IOException e) {e.printStackTrace();}
-
-        try
-        {
-            fis.getChannel().position(0);
-        }
-        catch (IOException e) {e.printStackTrace();}
-
-        String[] array = new String[anzahl];
-
-        String line;
-        int i = 0;
-        try
-        {
-            while((line=br.readLine())!=null)
-            {
-                array[i] = line;
-                i++;
-            }
-        }
-        catch (IOException e) {e.printStackTrace();}
-        return array;
-    }
-
-
-
     public void showScanLog(View v) {
         Intent intentScanLog = new Intent(this, ScanLogActivity.class);
         startActivity(intentScanLog);
     }
+
 
     // DRAWER MENU
     private void addDrawerItems() {
@@ -297,13 +220,6 @@ public class CalibrationActivity extends AppCompatActivity {
         return true;
     }
 
-    protected void onPause() {
-        super.onPause();
-    }
-
-    protected void onResume() {
-        super.onResume();
-    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 

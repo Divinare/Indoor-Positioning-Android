@@ -1,5 +1,10 @@
 package com.joe.indoorlocalization;
 
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+
+//import jsc.distributions.Normal;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -8,30 +13,31 @@ import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.os.PowerManager;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
+import com.joe.indoorlocalization.Calibration.CalibrationActivity;
 
 /**
- * Created by joe on 14/12/15.
+ *  Is used for Wifi fingerprints.
+ *
+ * This code has branched off an early version of HyperLoc, so if you see some oddities, this might be why.
+ * @author joe
+ *
  */
-public abstract class WifiScanner extends AppCompatActivity {
+public class WifiScannerOld extends CalibrationActivity {
 
-    static String TAG = WifiScanner.class.getSimpleName();
+    static String TAG = WifiScannerOld.class.getSimpleName();
 
     //WiFi tools
+    WifiManager mService;
     static PowerManager.WakeLock wakeLock;
     WifiManager mainWifi;
     WifiReceiver receiverWifi;
     List<ScanResult> wifiList;
 
     //The maximum number of fingerprints we want to record (for a ballpark figure, assume approx. 1 fingerprint/second on current Android devices)
-    static final int MAXPRINTS = 5;
+    static final int MAXPRINTS = 10;
 
     //True while training is in process
     boolean running = false;
@@ -41,48 +47,55 @@ public abstract class WifiScanner extends AppCompatActivity {
     AsyncTask<Integer, String, Hashtable<String, List<Integer>>> task = new RecordFingerprints();
     //Popup dialog that displays progress (also helps detect if the user has aborted the training process)
     static ProgressDialog progressDialog;
+
+    int cells = 51; //Needs to match the number of icons in "drawable"
+
     static StringBuilder fingerPrintData; // mac;rssi;mac;rssi... format
     static StringBuilder networks;
 
-    //private Context context;
+    private Context context;
+/*
+    public WifiScannerOld() {
+        init();
+    }
+*/
+    public WifiScannerOld(Context c) {
+        this.context = c;
+        initialize();
+    }
 
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mainWifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
-        PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
+    private void initialize() {
+        mainWifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         wakeLock = pm.newWakeLock(
                 PowerManager.SCREEN_DIM_WAKE_LOCK, "My wakelock");
         receiverWifi = new WifiReceiver();
-        this.registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-        progressDialog= new ProgressDialog(this);
+        context.registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        progressDialog= new ProgressDialog(context);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         progressDialog.setCancelable(true);
         progressDialog.setTitle("RECORDING");
         progressDialog.setMax(MAXPRINTS);
+        Log.d(TAG, "progressDialog created!");
+
     }
 
-    public void startScan() {
-        Log.d(TAG, "scan started!");
-        //Task has been initialized but not run a single time yet
-        if(task.getStatus()== AsyncTask.Status.PENDING){
-            //Show the progress dialog
-            progressDialog.setTitle("TRAINING CELL "+position);
-            progressDialog.show();
-            //Start the recording
-            task.execute(position);
-
-        }
-        //Task has been allowed to finish
-        if(task.getStatus()== AsyncTask.Status.FINISHED) {
-            //Re-initialize
-            task = new RecordFingerprints();
-            progressDialog.setTitle("TRAINING CELL " + position);
-            progressDialog.show();
-            task.execute(position);
-        }
+    public void start() {
+        task.execute();
     }
+
+    public void stop() {
+        task.cancel(true);
+    }
+
+    public StringBuilder getFingerPrintData() {
+        return this.fingerPrintData;
+    }
+
+    public StringBuilder getNetworks() {
+        return this.networks;
+    }
+
 
     protected void onPause() {
         unregisterReceiver(receiverWifi);
@@ -92,6 +105,12 @@ public abstract class WifiScanner extends AppCompatActivity {
     protected void onResume() {
         registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
         super.onResume();
+    }
+
+    @Override
+    protected void onStop() {
+        unregisterReceiver(receiverWifi);
+        super.onStop();
     }
 
 
@@ -118,8 +137,30 @@ public abstract class WifiScanner extends AppCompatActivity {
                         if (j < wifiList.size() - 1) {
                             fingerPrintData.append(";");
                         }
+                    /*
+                    if (j<wifiList.size()-1) {
+                        macs.append(",");
+                    }
+                    RSSIs.append(wifiList.get(j).level);
+                    if (j<wifiList.size()-1) {
+                        RSSIs.append(",");
+                    }
+                    networks.append(wifiList.get(j).SSID);
+                    if (j<wifiList.size()-1) {
+                        networks.append(",");
+                    }
+                    */
                     }
                 }
+                /*
+                fingerprint.append(macs);
+                fingerprint.append("\n");
+                fingerprint.append(RSSIs);
+                fingerprint.append("\n");
+                fingerprint.append(networks);
+                fingerprint.append("\n");
+                */
+
                 progressDialog.incrementProgressBy(1);
 
                 mainWifi.startScan();
@@ -132,18 +173,17 @@ public abstract class WifiScanner extends AppCompatActivity {
     //Asynchronous task runs in background so we don't make the UI wait
     private class RecordFingerprints extends AsyncTask<Integer, String, Hashtable<String,List<Integer>>> {
         boolean running = true;
-
-        protected Hashtable<String, List<Integer>> doInBackground(Integer... params) {
+        protected Hashtable<String,List<Integer>> doInBackground(Integer... params) {
 
             progressDialog.setProgress(0);
             mainWifi.startScan();
 
             wakeLock.acquire();
-            while (running) {
+            while(running){
                 //Store the recorded fingerprint in a file named after the cell in which it was recorded
-                if (!progressDialog.isShowing() || progressDialog.getProgress() >= progressDialog.getMax()) {
+                if(!progressDialog.isShowing() || progressDialog.getProgress()>=progressDialog.getMax()){
                     //Log.d(TAG, fingerprint.toString());
-                    Log.d(TAG, "at progress dialog running method");
+
                     /*
                     File file = new File(PATH, "/fingerprints/"+params[0]+".txt");
                     try{
@@ -155,7 +195,9 @@ public abstract class WifiScanner extends AppCompatActivity {
                     progressDialog.dismiss();
                     return null;
                     */
-                } else {
+                }
+
+                else{
                     publishProgress("");
                 }
 
@@ -172,8 +214,7 @@ public abstract class WifiScanner extends AppCompatActivity {
         }
 
         protected void onProgressUpdate(String... progress) {
-            Log.d(TAG, "at progress update");
-            progressDialog.incrementProgressBy(1);
+            //progressDialog.incrementProgressBy(1);
         }
 
         @SuppressWarnings("unused")

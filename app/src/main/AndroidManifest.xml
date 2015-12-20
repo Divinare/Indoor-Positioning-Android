@@ -27,7 +27,7 @@
             android:value="records.db" />
         <meta-data
             android:name="VERSION"
-            android:value="9" />
+            android:value="10" />
         <meta-data
             android:name="QUERY_LOG"
             android:value="true" />
@@ -40,10 +40,14 @@
             android:label="@string/calibration"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
+            android:noHistory="true"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Locate.LocateActivity"
-            android:label="IndoorLocation">
+            android:label="IndoorLocation"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

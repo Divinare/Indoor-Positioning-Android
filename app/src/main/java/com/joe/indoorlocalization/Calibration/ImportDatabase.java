@@ -125,12 +125,7 @@ public class ImportDatabase extends ListActivity {
                 for(int i = 3; i < array.length-1; i=i+2) {
                     String mac = array[i]; // list goes mac;rssi;mac;rssi...
                     String RSSI = array[i+1];
-                    Long scanId = scan.getId();
-                    Log.i(TAG, "" + scanId);
-                    FingerPrint fp = new FingerPrint(scanId, mac, RSSI);
-                    //Scan s = fp.getScan();
-                    //float test = s.getX();
-                    //Log.i(TAG, "" + test);
+                    FingerPrint fp = new FingerPrint(scan, mac, RSSI);
                     fp.save();
                     fingerPrints.add(fp);
                 }

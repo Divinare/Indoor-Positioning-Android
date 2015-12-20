@@ -45,7 +45,7 @@
         </LinearLayout>
 
 
-        <com.joe.indoorlocalization.CustomImageViewLocate
+        <com.joe.indoorlocalization.Locate.CustomImageViewLocate
             android:id="@+id/customImageViewLocate"
             android:layout_width="fill_parent"
             android:layout_height="match_parent"

@@ -24,7 +24,6 @@ public class CustomImageViewLocate extends CustomImageView {
     @Override
     public void setText() {
         TextView test = (TextView) ((Activity) getContext()).findViewById(R.id.locationCoordinates);
-        test.setText("JEEE");
     }
 
 }

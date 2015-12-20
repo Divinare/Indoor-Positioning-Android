@@ -26,6 +26,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.joe.indoorlocalization.CustomImageView;
+import com.joe.indoorlocalization.Drawer;
 import com.joe.indoorlocalization.Options;
 import com.joe.indoorlocalization.R;
 import com.joe.indoorlocalization.WifiScanner;
@@ -48,15 +49,9 @@ public class CalibrationActivity extends WifiScanner {
 
     static String TAG = CalibrationActivity.class.getSimpleName();
 
+    Drawer drawer = new Drawer(this);
     private CustomImageView customImageView;
-    private WifiScannerOld wifiScanner;
 
-    private ListView mDrawerList;
-    private ArrayAdapter<String> mAdapter;
-    private DrawerLayout mDrawerLayout;
-    private ActionBarDrawerToggle mDrawerToggle;
-
-    private int floor = 1;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -67,13 +62,12 @@ public class CalibrationActivity extends WifiScanner {
 
         customImageView = (CustomImageView) findViewById(R.id.customImageViewCalibrate);
 
-        mDrawerList = (ListView)findViewById(R.id.navList);
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout_calibration);
         getSupportActionBar().setTitle("Calibrate");
-        addDrawerItems();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
-        setupDrawer();
+
+        drawer.initDrawer("calibration", this);
+
     }
 
     public void saveRecord(View v) {
@@ -87,10 +81,6 @@ public class CalibrationActivity extends WifiScanner {
         String fileName = "dataJoe.txt";
 
         File file = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), fileName);
-        /*  if( file.exists() ){
-            file.delete();
-            Log.d(TAG, "Old fingerprint file deleted...");
-        }*/
 
         Log.i(TAG, "Trying to save file...");
 
@@ -99,7 +89,7 @@ public class CalibrationActivity extends WifiScanner {
         Point point = customImageView.getLastPoint();
         float x = point.x;
         float y = point.y;
-        int z = floor;
+        int z = drawer.getCurrentFloor();
 
         // FORMAT: z;x;y;mac;rssi;mac;rssi;mac;rssi...
         String row = z + ";" + x + ";" + y + ";" + fingerPrintData.toString();
@@ -124,94 +114,6 @@ public class CalibrationActivity extends WifiScanner {
     }
 
 
-    // DRAWER MENU
-    private void addDrawerItems() {
-        String[] osArray = { "Basement", "Floor 1", "Floor 2", "Floor 3", "Floor 4" };
-        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, osArray);
-        mDrawerList.setAdapter(mAdapter);
-        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
-        Log.i(TAG, "selected items set");
-    }
-
-    private class DrawerItemClickListener implements ListView.OnItemClickListener {
-        @Override
-        public void onItemClick(AdapterView parent, View view, int position, long id) {
-            selectItem(position);
-        }
-    }
-
-    /** Swaps fragments in the main content view */
-    private void selectItem(int position) {
-        this.floor = position;
-        Log.i(TAG, "position " + position + " clicked");
-
-        setFloorText(position);
-        changeFloor(position);
-
-        // Highlight the selected item, update the title, and close the drawer
-        mDrawerList.setItemChecked(position, true);
-        mDrawerLayout.closeDrawer(mDrawerList);
-    }
-
-    private void setFloorText(int floor) {
-        TextView floorTextView = (TextView)findViewById(R.id.floorCalibration);
-        if(floor == 0) {
-            floorTextView.setText("Floor: basement");
-        } else {
-            floorTextView.setText("Floor " + floor);
-        }
-    }
-
-    private void changeFloor(int floor) {
-        CustomImageViewCalibrate imageView = (CustomImageViewCalibrate)findViewById(R.id.customImageViewCalibrate);
-        TextView positionZ = (TextView)findViewById(R.id.positionZ);
-
-        switch(floor) {
-            case 0:
-                imageView.setImageResource(R.drawable.exactum0);
-                positionZ.setText("Z: 0");
-                break;
-            case 1:
-                imageView.setImageResource(R.drawable.exactum1);
-                positionZ.setText("Z: 1");
-                break;
-            case 2:
-                imageView.setImageResource(R.drawable.exactum2);
-                positionZ.setText("Z: 2");
-                break;
-            case 3:
-                imageView.setImageResource(R.drawable.exactum3);
-                positionZ.setText("Z: 3");
-                break;
-            case 4:
-                imageView.setImageResource(R.drawable.exactum4);
-                positionZ.setText("Z: 4");
-                break;
-        }
-    }
-
-    private void setupDrawer() {
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-                R.string.drawer_open, R.string.drawer_close) {
-
-            /** Called when a drawer has settled in a completely open state. */
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                mDrawerList.bringToFront();
-                mDrawerLayout.requestLayout();
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-            }
-
-            /** Called when a drawer has settled in a completely closed state. */
-            public void onDrawerClosed(View view) {
-                super.onDrawerClosed(view);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-            }
-        };
-        mDrawerToggle.setDrawerIndicatorEnabled(true);
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
-    }
-
     // OPTIONS MENU
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -223,7 +125,7 @@ public class CalibrationActivity extends WifiScanner {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
+        if (drawer.mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
 

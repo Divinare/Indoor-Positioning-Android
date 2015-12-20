@@ -99,13 +99,35 @@ public class ImportDatabase extends ListActivity {
             Toast.makeText(this, "Reading file " + o.getName() + " failed.", Toast.LENGTH_SHORT).show();
         }
         emptyDatabase();
-        importIntoDatabase(fileContent, o.getName());
+        //importIntoDatabase(fileContent, o.getName());
+        test(fileContent, o.getName());
     }
 
     private void emptyDatabase() {
         FingerPrint.deleteAll(FingerPrint.class);
         Scan.deleteAll(Scan.class);
         Log.d(TAG, "Database emptied");
+    }
+
+    private void test(StringBuilder fileContent, String fileName) {
+        Log.d(TAG, "reading....");
+        String[] rows = fileContent.toString().split("\\n");
+        for(String row: rows) {
+            String[] array = row.split(";"); // Each row is now in a row array
+            int z = Integer.parseInt(array[0]);
+            float x = Float.parseFloat(array[1]);
+            float y = Float.parseFloat(array[2]);
+
+            Scan scan = new Scan(z, x, y);
+
+            for(int i = 3; i < array.length-1; i=i+2) {
+                String mac = array[i]; // list goes mac;rssi;mac;rssi...
+                String RSSI = array[i+1];
+                FingerPrint fp = new FingerPrint(scan, mac, RSSI);
+            }
+
+        }
+        Log.d(TAG, "done!");
     }
 
     private void importIntoDatabase(StringBuilder fileContent, String fileName) {

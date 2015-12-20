@@ -82,8 +82,11 @@ public class CustomImageView extends ImageView {
                 PointF curr = new PointF(event.getX(), event.getY());
 
                 Point imagePoint = translateCoordinatesFromEvent(event);
-                setX(imagePoint.x);
-                setY(imagePoint.y);
+
+                if(isInsideImage(imagePoint)) {
+                    setX(imagePoint.x);
+                    setY(imagePoint.y);
+                }
 
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
@@ -210,6 +213,7 @@ public class CustomImageView extends ImageView {
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        Log.d(TAG, "at on draw");
         Rect r = getDrawable().getBounds();
         Point point = translateCoordinates(new PointF(last.x, last.y));
 
@@ -222,7 +226,7 @@ public class CustomImageView extends ImageView {
         paint.setAntiAlias(true);
         paint.setColor(Color.BLUE);
 
-        canvas.drawCircle(last.x, last.y, 15, paint);
+        canvas.drawCircle(last.x, last.y, 20, paint);
     }
 
     @Override

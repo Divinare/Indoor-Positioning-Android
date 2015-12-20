@@ -51,7 +51,6 @@ public class Drawer extends AppCompatActivity {
         this.className = className;
         mDrawerList = (ListView) activity.findViewById(R.id.navList);
         mDrawerLayout = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
-        Log.d(TAG, "drawer layeout");
         Log.d(TAG, mDrawerLayout.toString());
         dynamicallyAddBlueprints();
         addDrawerItems(context);
@@ -65,27 +64,19 @@ public class Drawer extends AppCompatActivity {
     // DRAWER MENU
     private void addDrawerItems(Context context) {
         String[] drawerListNames = new String[blueprints.size()];
-        Log.d(TAG, "adding drawer list itmes");
         int index = 0;
         for (HashMap.Entry<Integer, String> entry : blueprints.entrySet()) {
             if(entry.getKey() == 0) {
                 drawerListNames[index] = "Basement";
-                Log.d(TAG, "BAsement");
             } else {
-                Log.d(TAG, "Floor " + entry.getKey());
                 drawerListNames[index] = "Floor " + entry.getKey();
             }
             index++;
-        }
-        Log.d(TAG, "itmes andded");
-        for(String d : drawerListNames) {
-            Log.d(TAG, "ddd " + d);
         }
 
         mAdapter = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, drawerListNames);
         mDrawerList.setAdapter(mAdapter);
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
-        Log.i(TAG, "selected items set");
     }
 
     private class DrawerItemClickListener implements ListView.OnItemClickListener {

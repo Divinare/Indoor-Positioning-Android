@@ -40,7 +40,7 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="Floor 1"
-                android:textSize="25sp"
+                android:textSize="20sp"
                 android:layout_weight="1"/>
 
         </LinearLayout>

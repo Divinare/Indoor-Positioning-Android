@@ -9,24 +9,17 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
 
-import com.joe.indoorlocalization.Drawer;
+import com.joe.indoorlocalization.CustomImageView;
+import com.joe.indoorlocalization.SideMenu;
 import com.joe.indoorlocalization.Models.FingerPrint;
 import com.joe.indoorlocalization.Models.Scan;
 import com.joe.indoorlocalization.Options;
 import com.joe.indoorlocalization.R;
-import com.joe.indoorlocalization.WifiScanner;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -57,8 +50,8 @@ public class LocateActivity extends AppCompatActivity {
     private StringBuilder fingerPrintData; // mac;rssi;mac;rssi... format
     private StringBuilder networks;
 
-    Drawer drawer = new Drawer(this);
-
+    SideMenu sideMenu = new SideMenu(this);
+    private CustomImageView customImageViewLocate;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,7 +60,7 @@ public class LocateActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        drawer.initDrawer("locate", this);
+        sideMenu.initSideMenu("locate", this);
 
         mainWifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
@@ -82,6 +75,7 @@ public class LocateActivity extends AppCompatActivity {
         progressDialog.setMax(maxScans);
 
         mainWifi.startScan();
+        
         Log.i(TAG, "The app is running :)))");
     }
 
@@ -278,6 +272,8 @@ public class LocateActivity extends AppCompatActivity {
         float y = Math.round(ySumAverage/fpsLength);
 
         Log.i(TAG, "RESULT: z: " + division + " x: " + x + " y: " + y);
+        //customImageViewLocate.draw(x, y);
+        // TODO; change floor if the "setting" is on
     }
 
     // OPTIONS
@@ -290,7 +286,7 @@ public class LocateActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (drawer.mDrawerToggle.onOptionsItemSelected(item)) {
+        if (sideMenu.mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
 

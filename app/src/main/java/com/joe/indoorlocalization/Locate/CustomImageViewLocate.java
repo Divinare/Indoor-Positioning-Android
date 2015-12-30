@@ -13,6 +13,7 @@ import android.util.Log;
 import android.widget.TextView;
 
 import com.joe.indoorlocalization.CustomImageView;
+import com.joe.indoorlocalization.Drawer;
 import com.joe.indoorlocalization.R;
 
 
@@ -21,22 +22,13 @@ import com.joe.indoorlocalization.R;
  */
 public class CustomImageViewLocate extends CustomImageView {
 
-    static String TAG = "CustomImageViewLocate";
-
-
-    public CustomImageViewLocate(Context context, AttributeSet attrs) {
-        super(context, attrs);
+    public CustomImageViewLocate(Context context, AttributeSet attr) {
+        super(context, attr, new DrawerLocate());
     }
 
     @Override
     public void setText() {
         TextView test = (TextView) ((Activity) getContext()).findViewById(R.id.locationCoordinates);
-    }
-
-    @Override
-    public void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        Log.d(TAG, "do nothing...");
     }
 
 }

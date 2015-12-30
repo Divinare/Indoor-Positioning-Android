@@ -28,29 +28,49 @@ public class CustomImageView extends ImageView {
 
     int mode = NONE;
 
-    // Remember some things for zooming  
-    PointF last = new PointF();
-    PointF start = new PointF();
-    float minScale = 1f;
-    float maxScale = 3f;
-    float[] m;
-    int viewWidth, viewHeight;
-    static final int CLICK = 3;
-    float saveScale = 1f;
+    private PointF last = new PointF();
+    private PointF start = new PointF();
+    private float minScale = 1f;
+    private float maxScale = 3f;
+    private float[] m;
+    private int viewWidth, viewHeight;
+    private static final int CLICK = 3;
+    private float saveScale = 1f;
     protected float origWidth, origHeight;
-    int oldMeasuredWidth, oldMeasuredHeight;
-    ScaleGestureDetector mScaleDetector;
-    ScaleListener scaleListener;
-    Context context;
+    private int oldMeasuredWidth, oldMeasuredHeight;
+    private ScaleGestureDetector mScaleDetector;
+    private ScaleListener scaleListener;
+    private Context context;
+
+    Drawer drawer;
 
     public CustomImageView(Context context) {
         super(context);
         sharedConstructing(context);
+        Log.d(TAG, "Drawer not set");
+
+    }
+
+    public CustomImageView(Context context, Drawer drawer) {
+        super(context);
+        sharedConstructing(context);
+        this.drawer = drawer;
+        Log.d(TAG, "Drawer set");
+    }
+
+    public CustomImageView(Context context, AttributeSet attrs, Drawer drawer) {
+        super(context, attrs);
+        sharedConstructing(context);
+        this.drawer = drawer;
+        Log.d(TAG, "Drawer set2");
+
     }
 
     public CustomImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
         sharedConstructing(context);
+        Log.d(TAG, "Drawer not set2");
+
     }
 
     // This method should be overwritten
@@ -210,11 +230,17 @@ public class CustomImageView extends ImageView {
         return false;
     }
 
+    //public void draw(float x, float y) {
+    //    Log.d(TAG, "drawing at " + x + " y: " +y);
+
+    //}
+
+
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         Log.d(TAG, "at on draw");
-        Rect r = getDrawable().getBounds();
+
         Point point = translateCoordinates(new PointF(last.x, last.y));
 
         // Not drawing outside of the image
@@ -222,12 +248,13 @@ public class CustomImageView extends ImageView {
             return;
         }
 
-        Paint paint = new Paint();
-        paint.setAntiAlias(true);
-        paint.setColor(Color.BLUE);
-
-        canvas.drawCircle(last.x, last.y, 20, paint);
+        if(drawer != null) {
+            drawer.draw(canvas, last);
+        } else {
+            Log.d(TAG, "drawer was null :(");
+        }
     }
+
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {

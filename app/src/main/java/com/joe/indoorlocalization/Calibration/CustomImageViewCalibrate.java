@@ -16,9 +16,8 @@ public class CustomImageViewCalibrate extends CustomImageView {
 
     static String TAG = CustomImageViewCalibrate.class.getSimpleName();
 
-
-    public CustomImageViewCalibrate(Context context, AttributeSet attrs) {
-        super(context, attrs);
+    public CustomImageViewCalibrate(Context context, AttributeSet attr) {
+        super(context, attr, new DrawerCalibrate());
     }
 
     @Override

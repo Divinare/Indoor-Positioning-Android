@@ -91,7 +91,7 @@ public class CalibrationActivity extends AppCompatActivity {
         What to do when our BroadcastReceiver (or in this case, the WifiReceiver that implements it) returns its result
          */
         public void onReceive(Context c, Intent intent) {
-            Log.d("FINGER","Scan received");
+            Log.d("FINGER","FingerPrint received");
 
             fingerPrintData = new StringBuilder();
             networks = new StringBuilder();
@@ -114,7 +114,7 @@ public class CalibrationActivity extends AppCompatActivity {
                 progressDialog.incrementProgressBy(1);
 
                 mainWifi.startScan();
-                Log.d("FINGER","Scan initiated");
+                Log.d("FINGER","FingerPrint initiated");
             } else {
                 try {
                     unregisterReceiver(receiverWifi);

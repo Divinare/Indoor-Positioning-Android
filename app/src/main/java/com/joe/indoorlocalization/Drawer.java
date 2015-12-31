@@ -10,7 +10,6 @@ import android.util.Log;
  */
 public class Drawer {
 
-    public void draw(Canvas canvas, PointF point) {
-        Log.d("hm", "At drawerrrr");
+    public void draw(Canvas canvas, CustomImageView view, Point point) {
     }
 }

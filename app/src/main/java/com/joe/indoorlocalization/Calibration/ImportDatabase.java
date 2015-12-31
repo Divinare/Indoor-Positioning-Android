@@ -3,7 +3,6 @@ package com.joe.indoorlocalization.Calibration;
 import android.app.ListActivity;
 import android.content.Context;
 import android.os.Bundle;
-import android.app.Activity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -104,8 +103,8 @@ public class ImportDatabase extends ListActivity {
     }
 
     private void emptyDatabase() {
-        FingerPrint.deleteAll(FingerPrint.class);
-        Scan.deleteAll(Scan.class);
+        //Scan.deleteAll(Scan.class);
+        //FingerPrint.deleteAll(FingerPrint.class);
         Log.d(TAG, "Database emptied");
     }
 
@@ -118,12 +117,12 @@ public class ImportDatabase extends ListActivity {
             float x = Float.parseFloat(array[1]);
             float y = Float.parseFloat(array[2]);
 
-            Scan scan = new Scan(z, x, y);
+            FingerPrint scan = new FingerPrint(z, x, y);
 
             for(int i = 3; i < array.length-1; i=i+2) {
                 String mac = array[i]; // list goes mac;rssi;mac;rssi...
                 String RSSI = array[i+1];
-                FingerPrint fp = new FingerPrint(scan, mac, RSSI);
+                Scan fp = new Scan(scan, mac, RSSI);
             }
 
         }
@@ -140,15 +139,15 @@ public class ImportDatabase extends ListActivity {
                 float x = Float.parseFloat(array[1]);
                 float y = Float.parseFloat(array[2]);
 
-                Scan scan = new Scan(z, x, y);
-                scan.save();
-                List<FingerPrint> fingerPrints = new ArrayList<>();
+                FingerPrint scan = new FingerPrint(z, x, y);
+                //scan.save();
+                List<Scan> fingerPrints = new ArrayList<>();
 
                 for(int i = 3; i < array.length-1; i=i+2) {
                     String mac = array[i]; // list goes mac;rssi;mac;rssi...
                     String RSSI = array[i+1];
-                    FingerPrint fp = new FingerPrint(scan, mac, RSSI);
-                    fp.save();
+                    Scan fp = new Scan(scan, mac, RSSI);
+                    //fp.save();
                     fingerPrints.add(fp);
                 }
 

@@ -22,8 +22,13 @@ import com.joe.indoorlocalization.R;
  */
 public class CustomImageViewLocate extends CustomImageView {
 
+
+   // public CustomImageViewLocate(Context context, AttributeSet attr) {
+   //     super(context, attr);
+   // }
+
     public CustomImageViewLocate(Context context, AttributeSet attr) {
-        super(context, attr, new DrawerLocate());
+        super(context, attr, new DrawerLocate(context));
     }
 
     @Override

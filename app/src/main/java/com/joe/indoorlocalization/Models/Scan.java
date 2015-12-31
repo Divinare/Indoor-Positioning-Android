@@ -1,51 +1,55 @@
 package com.joe.indoorlocalization.Models;
 
-import com.orm.SugarRecord;
-
-import java.util.List;
-
 /**
- * Created by joe on 01/12/15.
+ * Created by joe on 22/11/15.
  */
-public class Scan extends SugarRecord<Scan> {
+public class Scan {
 
-    private float x;
-    private float y;
-    private int z;
-    //private int timestamp;
+    private FingerPrint fingerPrint;
+    private String mac;
+    private String RSSI;
+    private String network;
 
     public Scan() {
 
     }
 
-
-    public Scan(int z, float x, float y) {
-        this.z = z;
-        this.x = x;
-        this.y = y;
+    public Scan(FingerPrint fingerPrint, String mac, String RSSI) {
+        this.fingerPrint = fingerPrint;
+        this.mac = mac;
+        this.RSSI = RSSI;
     }
 
-    public int getZ() {
-        return this.z;
-    }
-    public float getX() {
-        return this.x;
-    }
-    public float getY() {
-        return this.y;
+    public Scan(FingerPrint fingerPrint, String mac, String RSSI, String network) {
+        this.fingerPrint = fingerPrint;
+        this.mac = mac;
+        this.RSSI = RSSI;
+        this.network = network;
     }
 
-    public List<FingerPrint> getFingerPrints() {
-        return FingerPrint.find(FingerPrint.class, "scan = ?", "" + this.getId());
+    public FingerPrint getFingerPrint() {
+        return this.fingerPrint;
+    }
+    public String getMac() {
+        return this.mac;
+    };
+    public String getRSSI() {
+        return this.RSSI;
+    };
+    public String getNetwork() {
+        return this.network;
+    };
+    public void setScan(FingerPrint fingerPrint) {
+        this.fingerPrint = fingerPrint;
+    }
+    public void setMacs(String mac) {
+        this.mac = mac;
+    }
+    public void setRSSIs(String RSSI) {
+        this.RSSI = RSSI;
+    }
+    public void setNetworks(String network) {
+        this.network = network;
     }
 
-    public void setZ(int z) {
-        this.z = z;
-    }
-    public void setX(float x) {
-        this.x = x;
-    }
-    public void setY(float y) {
-        this.y = y;
-    }
 }

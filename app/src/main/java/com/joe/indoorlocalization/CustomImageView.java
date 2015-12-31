@@ -28,8 +28,8 @@ public class CustomImageView extends ImageView {
 
     int mode = NONE;
 
-    private PointF last = new PointF();
-    private PointF start = new PointF();
+    private Point last = new Point();
+    private Point start = new Point();
     private float minScale = 1f;
     private float maxScale = 3f;
     private float[] m;
@@ -99,9 +99,9 @@ public class CustomImageView extends ImageView {
             public boolean onTouch(View v, MotionEvent event) {
 
                 mScaleDetector.onTouchEvent(event);
-                PointF curr = new PointF(event.getX(), event.getY());
+                Point curr = new Point((int)event.getX(), (int)event.getY());
 
-                Point imagePoint = translateCoordinatesFromEvent(event);
+                Point imagePoint = convertScreenPointToImagePointFromEvent(event);
 
                 if(isInsideImage(imagePoint)) {
                     setX(imagePoint.x);
@@ -110,8 +110,10 @@ public class CustomImageView extends ImageView {
 
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        last.set(curr);
-                        start.set(last);
+                        //last.set(curr);
+                        //start.set(last);
+                        last = curr;
+                        start = last;
                         mode = DRAG;
                         break;
                     case MotionEvent.ACTION_MOVE:
@@ -143,16 +145,8 @@ public class CustomImageView extends ImageView {
         });
     }
 
-    private Point translateCoordinatesFromEvent(MotionEvent event) {
-        return translateCoordinates(new PointF(event.getX(), event.getY()));
-    }
-
-    private Point translateCoordinates(PointF point) {
-        Matrix inverse = new Matrix();
-        matrix.invert(inverse);
-        float[] pts = {point.x, point.y};
-        inverse.mapPoints(pts);
-        return new Point((int) pts[0], (int) pts[1]);
+    private Point convertScreenPointToImagePointFromEvent(MotionEvent event) {
+        return convertScreenPointToImagePoint(new Point((int)event.getX(), (int)event.getY()));
     }
 
     public void setMaxZoom(float x) {
@@ -230,26 +224,29 @@ public class CustomImageView extends ImageView {
         return false;
     }
 
-    //public void draw(float x, float y) {
-    //    Log.d(TAG, "drawing at " + x + " y: " +y);
+    public Point convertImagePointToScreenPoint(Point point){
+        float[] pts = {point.x, point.y};
+        Matrix matrix = this.getImageMatrix();
+        matrix.mapPoints(pts);
+        return new Point((int)pts[0], (int)pts[1]);
+    }
 
-    //}
-
+    public Point convertScreenPointToImagePoint(Point point) {
+        Matrix inverse = new Matrix();
+        matrix.invert(inverse);
+        float[] pts = {point.x, point.y};
+        inverse.mapPoints(pts);
+        return new Point((int) pts[0], (int) pts[1]);
+    }
 
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         Log.d(TAG, "at on draw");
 
-        Point point = translateCoordinates(new PointF(last.x, last.y));
-
-        // Not drawing outside of the image
-        if(!isInsideImage(point)) {
-            return;
-        }
-
         if(drawer != null) {
-            drawer.draw(canvas, last);
+            Log.d(TAG, "calling drawer");
+            drawer.draw(canvas, this, last);
         } else {
             Log.d(TAG, "drawer was null :(");
         }
@@ -297,7 +294,7 @@ public class CustomImageView extends ImageView {
     }
 
     public Point getLastPoint() {
-        return translateCoordinates(last);
+        return convertScreenPointToImagePoint(last);
     }
 
 } 

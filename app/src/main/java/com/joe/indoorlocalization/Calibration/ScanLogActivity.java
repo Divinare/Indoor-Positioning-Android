@@ -1,19 +1,15 @@
 package com.joe.indoorlocalization.Calibration;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.app.Activity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import com.joe.indoorlocalization.Calibration.CalibrationActivity;
-import com.joe.indoorlocalization.Models.FingerPrint;
+import com.joe.indoorlocalization.Models.Scan;
 import com.joe.indoorlocalization.Options;
 import com.joe.indoorlocalization.R;
 
@@ -29,8 +25,9 @@ public class ScanLogActivity extends Activity {
         setContentView(R.layout.activity_scan_log);
 
         LinearLayout scanLogScrollView = (LinearLayout)findViewById(R.id.scanLogLinearLayout);
+/*
+       // List<Scan> scans = Scan.listAll(Scan.class);
 
-        List<FingerPrint> fingerPrints = FingerPrint.listAll(FingerPrint.class);
         for(int i = 0; i < fingerPrints.size(); i++) {
             //float x = fingerPrints.get(i).getX();
             //float y = fingerPrints.get(i).getY();
@@ -40,7 +37,7 @@ public class ScanLogActivity extends Activity {
             //String networks = fingerPrints.get(i).getNetworks();
 
             Log.i(TAG, mac + "\n" + RSSI + "\n");
-          /*
+
             LinearLayout ll = new LinearLayout(this);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -58,15 +55,15 @@ public class ScanLogActivity extends Activity {
             removeBtn.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
                     Log.i(TAG, "Clicked button with id: " + id);
-                    FingerPrint fingerPrint = FingerPrint.findById(FingerPrint.class, id);
+                    Scan fingerPrint = Scan.findById(Scan.class, id);
                     fingerPrint.delete();
                 }
             });
             ll.addView(removeBtn, layoutParams);
             scanLogScrollView.addView(ll);
-            */
-        }
 
+        }
+*/
     }
 
 

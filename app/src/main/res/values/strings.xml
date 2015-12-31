@@ -73,7 +73,7 @@
     <string name="btnScanLog">Scan log</string>
     <string name="calibration">Calibration</string>
 
-    <!-- Scan log -->
+    <!-- FingerPrint log -->
     <string name="btnBack">Back</string>
 
     <string name="title_activity_menu">MenuActivity</string>

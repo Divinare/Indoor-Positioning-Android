@@ -1,7 +1,9 @@
-package com.joe.indoorlocalization.Calibration;
+package com.joe.indoorlocalization;
 
+import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,9 +14,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.joe.indoorlocalization.Locate.LocateActivity;
 import com.joe.indoorlocalization.Models.FingerPrint;
 import com.joe.indoorlocalization.Models.Scan;
-import com.joe.indoorlocalization.R;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -24,12 +26,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class ImportDatabase extends ListActivity {
+public class FileChooser extends ListActivity {
 
-    static String TAG = ImportDatabase.class.getSimpleName();
+    static String TAG = FileChooser.class.getSimpleName();
 
     private File currentDir;
     private FileArrayAdapter adapter;
+    private ApplicationState state;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +48,7 @@ public class ImportDatabase extends ListActivity {
         List<Option> dir = new ArrayList<Option>();
         List<Option>fls = new ArrayList<Option>();
 
-        adapter = new FileArrayAdapter(ImportDatabase.this,R.layout.file_view,dir);
+        adapter = new FileArrayAdapter(FileChooser.this, R.layout.file_view,dir);
         this.setListAdapter(adapter);
 
         try {
@@ -65,6 +69,7 @@ public class ImportDatabase extends ListActivity {
         dir.add(0,new Option("..","Parent Directory",f.getParent()));
     }
 
+
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         // TODO Auto-generated method stub
@@ -79,84 +84,11 @@ public class ImportDatabase extends ListActivity {
     }
 
     private void onFileClick(Option o) {
-        File file = new File(o.getPath());
-        Log.d(TAG, o.getPath());
-        StringBuilder fileContent = new StringBuilder();
 
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String line;
-
-            while ((line = br.readLine()) != null) {
-                fileContent.append(line);
-                fileContent.append('\n');
-            }
-            br.close();
-        }
-        catch (IOException e) {
-            Log.d(TAG, "Reading file from path " + o.getPath() + " failed!");
-            Toast.makeText(this, "Reading file " + o.getName() + " failed.", Toast.LENGTH_SHORT).show();
-        }
-        emptyDatabase();
-        //importIntoDatabase(fileContent, o.getName());
-        test(fileContent, o.getName());
-    }
-
-    private void emptyDatabase() {
-        //Scan.deleteAll(Scan.class);
-        //FingerPrint.deleteAll(FingerPrint.class);
-        Log.d(TAG, "Database emptied");
-    }
-
-    private void test(StringBuilder fileContent, String fileName) {
-        Log.d(TAG, "reading....");
-        String[] rows = fileContent.toString().split("\\n");
-        for(String row: rows) {
-            String[] array = row.split(";"); // Each row is now in a row array
-            int z = Integer.parseInt(array[0]);
-            float x = Float.parseFloat(array[1]);
-            float y = Float.parseFloat(array[2]);
-
-            FingerPrint scan = new FingerPrint(z, x, y);
-
-            for(int i = 3; i < array.length-1; i=i+2) {
-                String mac = array[i]; // list goes mac;rssi;mac;rssi...
-                String RSSI = array[i+1];
-                Scan fp = new Scan(scan, mac, RSSI);
-            }
-
-        }
-        Log.d(TAG, "done!");
-    }
-
-    private void importIntoDatabase(StringBuilder fileContent, String fileName) {
-        Log.d(TAG, "Importing into database " + fileName);
-        String[] rows = fileContent.toString().split("\\n");
-        for(String row: rows) {
-            //Log.i(TAG, row);
-            String[] array = row.split(";"); // Each row is now in a row array
-                int z = Integer.parseInt(array[0]);
-                float x = Float.parseFloat(array[1]);
-                float y = Float.parseFloat(array[2]);
-
-                FingerPrint scan = new FingerPrint(z, x, y);
-                //scan.save();
-                List<Scan> fingerPrints = new ArrayList<>();
-
-                for(int i = 3; i < array.length-1; i=i+2) {
-                    String mac = array[i]; // list goes mac;rssi;mac;rssi...
-                    String RSSI = array[i+1];
-                    Scan fp = new Scan(scan, mac, RSSI);
-                    //fp.save();
-                    fingerPrints.add(fp);
-                }
-
-        }
-
-        Toast.makeText(this, "File " + fileName + " imported to database succesfully.", Toast.LENGTH_SHORT).show();
-
-
-
+        Intent returnIntent = new Intent();
+        returnIntent.putExtra("path", o.getPath());
+        setResult(Activity.RESULT_OK, returnIntent);
+        super.onBackPressed();
     }
 
     public class Option implements Comparable<Option>{

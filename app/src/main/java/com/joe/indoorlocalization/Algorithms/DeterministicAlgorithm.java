@@ -8,7 +8,17 @@ import android.view.View;
 import com.joe.indoorlocalization.ApplicationState;
 import com.joe.indoorlocalization.CustomImageView;
 import com.joe.indoorlocalization.IndoorLocalization;
+import com.joe.indoorlocalization.Models.FingerPrint;
+import com.joe.indoorlocalization.Models.Scan;
 import com.joe.indoorlocalization.R;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Created by joe on 31/12/15.
@@ -20,7 +30,6 @@ public class DeterministicAlgorithm {
     private ApplicationState state;
     private CustomImageView customImageView;
 
-
     public DeterministicAlgorithm(Context context) {
         //this.state = context.ge;
         this.state = ((IndoorLocalization)context.getApplicationContext()).getApplicationState();
@@ -28,6 +37,7 @@ public class DeterministicAlgorithm {
 
         View rootView = ((Activity)context).getWindow().getDecorView().findViewById(android.R.id.content);
         this.customImageView = (CustomImageView)rootView.findViewById(R.id.customImageViewLocate);
+
     }
 
     public void calcLocation(StringBuilder currentFingerPrintData) {
@@ -35,7 +45,8 @@ public class DeterministicAlgorithm {
 
         String currentFP = currentFingerPrintData.toString();
 
-        Log.d(TAG, currentFP.toString());
+        Log.d(TAG, currentFP);
+
 
 
         // Expected: 2;1773.0;1776.0
@@ -54,11 +65,30 @@ public class DeterministicAlgorithm {
         //String currentFP = "48973141298628;-34;238257140157761;-78;92676807119905;-75;238257141023941;-69;238257140157765;-78;238257141023938;-69;238257141023936;-67;238257140692594;-69;238257140692593;-68;238257140692592;-69;238257139252917;-91;238257141258448;-75;238257141258449;-72;238257141258450;-72;238257139252912;-65;238257139252914;-64;238257139252913;-63;238257140692597;-67";
 
         String[] currentFPArray = currentFP.split(";");
-/*
-        List<Scan> fingerPrints = Scan.listAll(Scan.class);
-        List<String> macList = new ArrayList<>();
-        for(Scan fingerPrint : fingerPrints) {
-            macList.add(fingerPrint.getMac());
+
+        ArrayList<FingerPrint> fps = state.getFingerPrints();
+        Log.d(TAG, "NOW IN DATABASE FPS LENGTH: " + fps.size());
+
+        for(int x = 0; x < fps.size(); x++) {
+            FingerPrint f = fps.get(x);
+            Log.d(TAG, "z: " + f.getZ() + " x: " + f.getX() + " y: " + f.getY());
+            Log.d(TAG, "scans size: " + f.getScans().size());
+            for(Scan scan : f.getScans()) {
+                Log.d(TAG, "Mac: " + scan.getMac() + " RSSI: " + scan.getRSSI() + " network: " + scan.getNetwork());
+            }
+
+        }
+
+
+
+        ArrayList<String> macList = new ArrayList<>();
+        ArrayList<Scan> allScans = new ArrayList<>();
+        for(FingerPrint fp : fps) {
+            ArrayList<Scan> scans = fp.getScans();
+            for(Scan scan : scans) {
+                macList.add(scan.getMac());
+                allScans.add(scan);
+            }
         }
 
         Set<String> uniqueMacs = new HashSet<>(macList);
@@ -74,12 +104,20 @@ public class DeterministicAlgorithm {
                 Log.i(TAG, "Go to the next iteration in the currentFPArray loop because the RSSI value was 0");
                 continue;
             }
-            List<Scan> fps = Scan.find(Scan.class, "mac = ?", currentMac);
+            List<Scan> scansByMacId = new ArrayList<>();
+
+            for(Scan scan : allScans) {
+                if(scan.getMac().equals(currentMac)) {
+                    scansByMacId.add(scan);
+                }
+            }
+
+            //List<Scan> scans = Scan.find(Scan.class, "mac = ?", currentMac);
 
             Map<Integer, Scan> distances = new HashMap<>();
 
             // Making distances array
-            for(Scan fp: fps) {
+            for(Scan fp: scansByMacId) {
                 int val1 = Math.abs(Integer.parseInt(currentRSSI));
                 int val2 = Math.abs(Integer.parseInt(fp.getRSSI()));
                 int distance = Math.abs(val1 - val2);
@@ -94,15 +132,15 @@ public class DeterministicAlgorithm {
             float xSum = 0;
             float ySum = 0;
             // For max nodesLimit get sum of z, x, y
-            for (Scan fp : sortedDistances.values()) {
+            for (Scan scan : sortedDistances.values()) {
                 if(nodes >= nodesLimit) {
                     break;
                 }
                 //FingerPrint scan = FingerPrint.findById(FingerPrint.class, fp.getScanId());
-                FingerPrint scan = fp.getScan();
-                zSum += scan.getZ();
-                xSum += scan.getX();
-                ySum += scan.getY();
+                FingerPrint fingerPrint = scan.getFingerPrint();
+                zSum += fingerPrint.getZ();
+                xSum += fingerPrint.getX();
+                ySum += fingerPrint.getY();
                 nodes++;
             }
             if(nodes > 0) {
@@ -125,10 +163,10 @@ public class DeterministicAlgorithm {
         //this.x = x;
         //this.y = y;
 
-        */
-        int x = 100;
-        int y = 350;
-        int z = 1;
+
+        //int x = 100;
+       // int y = 350;
+       // int z = 1;
 
         Log.i(TAG, "RESULT: z: " + z + " x: " + x + " y: " + y);
         //customImageViewLocate.draw(x, y);

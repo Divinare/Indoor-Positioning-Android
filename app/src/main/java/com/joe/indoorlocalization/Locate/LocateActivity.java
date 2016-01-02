@@ -1,5 +1,6 @@
 package com.joe.indoorlocalization.Locate;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -15,8 +16,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.joe.indoorlocalization.Algorithms.DeterministicAlgorithm;
+import com.joe.indoorlocalization.Calibration.CalibrationActivity;
+import com.joe.indoorlocalization.FileChooser;
+import com.joe.indoorlocalization.Models.ImportFile;
 import com.joe.indoorlocalization.SideMenu;
-import com.joe.indoorlocalization.Options;
 import com.joe.indoorlocalization.R;
 
 import java.io.BufferedReader;
@@ -47,6 +50,8 @@ public class LocateActivity extends AppCompatActivity {
 
     SideMenu sideMenu = new SideMenu(this);
     private DeterministicAlgorithm deterministicAlgorithm;
+    private ImportFile importFile;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -70,8 +75,9 @@ public class LocateActivity extends AppCompatActivity {
         progressDialog.setTitle("RECORDING");
         progressDialog.setMax(maxScans);
 
-        mainWifi.startScan();
         deterministicAlgorithm = new DeterministicAlgorithm(this);
+        importFile = new ImportFile(this);
+        mainWifi.startScan();
 
         Log.i(TAG, "The app is running :)))");
     }
@@ -187,12 +193,44 @@ public class LocateActivity extends AppCompatActivity {
             return true;
         }
 
-        Options options = new Options();
-        boolean ret = options.optionsItemSelected(item, this);
-        if (ret) {
+        final Intent intentLocate = new Intent(this, LocateActivity.class);
+        final Intent intentCalibrate = new Intent(this, CalibrationActivity.class);
+        final Intent intentImportDatabase = new Intent(this, FileChooser.class);
+
+        int id = item.getItemId();
+        if (id == R.id.menu_locate) {
+            this.startActivity(intentLocate);
+        } else if(id == R.id.menu_calibrate) {
+            this.startActivity(intentCalibrate);
+        } else if(id == R.id.menu_import_database) {
+            this.startActivityForResult(intentImportDatabase, 1);
+            return true;
+        } else if(id == R.id.menu_help) {
             return true;
         }
+
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == 1) {
+            if(resultCode == Activity.RESULT_OK){
+                Log.d(TAG, "Got result!");
+                String path=data.getStringExtra("path");
+                Log.d(TAG, "result: " + path);
+                importFile.importFile(path);
+            }
+            if (resultCode == Activity.RESULT_CANCELED) {
+                //Write your code if there's no result
+                Log.d(TAG, "Didnt get result");
+            }
+        }
+        mainWifi.startScan();
+
+
+
     }
 
 }

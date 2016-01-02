@@ -40,13 +40,13 @@
             android:label="@string/calibration"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:noHistory="true" />
+            android:noHistory="false" />
         <activity
             android:name=".Locate.LocateActivity"
             android:label="IndoorLocation"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:noHistory="true">
+            android:noHistory="false">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -58,7 +58,7 @@
             android:name=".Calibration.ScanLogActivity"
             android:label="@string/title_activity_scan_log"></activity>
         <activity
-            android:name=".Calibration.ImportDatabase"
+            android:name=".FileChooser"
             android:label="@string/title_activity_import_database"></activity>
     </application>
 

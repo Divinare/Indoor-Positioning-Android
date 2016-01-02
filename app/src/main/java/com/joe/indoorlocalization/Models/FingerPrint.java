@@ -1,5 +1,6 @@
 package com.joe.indoorlocalization.Models;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +13,7 @@ public class FingerPrint {
     private float y;
     private int z;
     //private int timestamp;
-    private ArrayList<Scan> scans;
+    private ArrayList<Scan> scans = new ArrayList();
 
     public FingerPrint() {
 
@@ -35,8 +36,16 @@ public class FingerPrint {
         return this.y;
     }
 
-    public List<Scan> getScans() {
+    public ArrayList<Scan> getScans() {
         return this.scans; // Scan.find(Scan.class, "scan = ?", "" + this.getId());
+    }
+
+    public void setScans(ArrayList<Scan> scans) {
+        this.scans = scans;
+    }
+
+    public void addScan(Scan scan) {
+        this.scans.add(scan);
     }
 
     public void setZ(int z) {

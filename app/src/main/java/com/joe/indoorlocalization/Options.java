@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.view.MenuItem;
 
 import com.joe.indoorlocalization.Calibration.CalibrationActivity;
-import com.joe.indoorlocalization.Calibration.ImportDatabase;
 import com.joe.indoorlocalization.Locate.LocateActivity;
 
 
@@ -23,7 +22,7 @@ public class Options {
 
         final Intent intentLocate = new Intent(context, LocateActivity.class);
         final Intent intentCalibrate = new Intent(context, CalibrationActivity.class);
-        final Intent intentImportDatabase = new Intent(context, ImportDatabase.class);
+        final Intent intentImportDatabase = new Intent(context, FileChooser.class);
 
         int id = item.getItemId();
         if (id == R.id.menu_locate) {

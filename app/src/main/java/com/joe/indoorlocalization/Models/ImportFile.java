@@ -6,6 +6,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.joe.indoorlocalization.ApplicationState;
+import com.joe.indoorlocalization.Calibration.CalibrateActivity;
 import com.joe.indoorlocalization.IndoorLocalization;
 import com.joe.indoorlocalization.Locate.LocateActivity;
 
@@ -24,19 +25,22 @@ public class ImportFile {
 
     private ApplicationState state;
     private Context context;
+    private String previousClassName;
 
-    public ImportFile(Context context) {
+    public ImportFile(Context context, String previousClassName) {
         this.context = context;
+        this.previousClassName = previousClassName;
         this.state = ((IndoorLocalization)context.getApplicationContext()).getApplicationState();
 
     }
 
     public void importFile(String path) {
-
+        String fileName = getFileName(path);
         try {
             StringBuilder fileContent = getFileContent(path);
             emptyDatabase();
             importIntoDatabase(fileContent, path);
+            Toast.makeText(context, "File " + fileName + " imported to database succesfully.", Toast.LENGTH_SHORT).show();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -45,6 +49,12 @@ public class ImportFile {
         }
     }
 
+    private String getFileName(String path) {
+        String[] temp = path.split("/");
+        return temp[temp.length-1];
+    }
+
+    // Read a file from path and return its content
     private StringBuilder getFileContent(String path) throws IOException {
         File file = new File(path);
         Log.d(TAG, path);
@@ -60,8 +70,6 @@ public class ImportFile {
             }
         }
         br.close();
-
-
         return fileContent;
     }
 
@@ -101,10 +109,13 @@ public class ImportFile {
             this.state.addFingerPrint(fingerPrint);
 
         }
-        Log.d(TAG, "NoW in database::::: " + this.state.getFingerPrints().size());
-        Toast.makeText(context, "File " + fileName + " imported to database succesfully.", Toast.LENGTH_SHORT).show();
-        final Intent intentLocate = new Intent(context, LocateActivity.class);
-        context.startActivity(intentLocate);
+        if(previousClassName.equals("calibrate")) {
+            final Intent intentCalibrate = new Intent(context, CalibrateActivity.class);
+            context.startActivity(intentCalibrate);
+        } else {
+            final Intent intentLocate = new Intent(context, LocateActivity.class);
+            context.startActivity(intentLocate);
+        }
     }
 
 }

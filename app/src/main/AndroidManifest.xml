@@ -36,7 +36,7 @@
             android:value="" />
 
         <activity
-            android:name=".Calibration.CalibrationActivity"
+            android:name=".Calibration.CalibrateActivity"
             android:label="@string/calibration"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"

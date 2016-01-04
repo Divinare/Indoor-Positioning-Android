@@ -14,9 +14,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
-import com.joe.indoorlocalization.Algorithms.DeterministicAlgorithm;
-import com.joe.indoorlocalization.Calibration.CalibrationActivity;
+import com.joe.indoorlocalization.Algorithms.K_NearestAlgorithm;
+import com.joe.indoorlocalization.Calibration.CalibrateActivity;
 import com.joe.indoorlocalization.FileChooser;
 import com.joe.indoorlocalization.Models.ImportFile;
 import com.joe.indoorlocalization.SideMenu;
@@ -49,7 +50,7 @@ public class LocateActivity extends AppCompatActivity {
     public float y;
 
     SideMenu sideMenu = new SideMenu(this);
-    private DeterministicAlgorithm deterministicAlgorithm;
+    private K_NearestAlgorithm deterministicAlgorithm;
     private ImportFile importFile;
 
 
@@ -57,9 +58,9 @@ public class LocateActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_locate);
-        getSupportActionBar().setTitle("Locate");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         sideMenu.initSideMenu("locate", this);
 
@@ -75,8 +76,9 @@ public class LocateActivity extends AppCompatActivity {
         progressDialog.setTitle("RECORDING");
         progressDialog.setMax(maxScans);
 
-        deterministicAlgorithm = new DeterministicAlgorithm(this);
-        importFile = new ImportFile(this);
+        deterministicAlgorithm = new K_NearestAlgorithm(this);
+        importFile = new ImportFile(this, "locate");
+        importFile.importFile("/sdcard/Android/data/com.joe.indoorlocalization/files/Documents/dataJoe.txt");
         mainWifi.startScan();
 
         Log.i(TAG, "The app is running :)))");
@@ -89,6 +91,7 @@ public class LocateActivity extends AppCompatActivity {
 
     protected void onResume() {
         registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        mainWifi.startScan();
         super.onResume();
     }
 
@@ -194,7 +197,7 @@ public class LocateActivity extends AppCompatActivity {
         }
 
         final Intent intentLocate = new Intent(this, LocateActivity.class);
-        final Intent intentCalibrate = new Intent(this, CalibrationActivity.class);
+        final Intent intentCalibrate = new Intent(this, CalibrateActivity.class);
         final Intent intentImportDatabase = new Intent(this, FileChooser.class);
 
         int id = item.getItemId();
@@ -223,14 +226,11 @@ public class LocateActivity extends AppCompatActivity {
                 importFile.importFile(path);
             }
             if (resultCode == Activity.RESULT_CANCELED) {
-                //Write your code if there's no result
-                Log.d(TAG, "Didnt get result");
+                Log.d(TAG, "Didnt get result from importFile");
+                Toast.makeText(this, "Couldn't get file data", Toast.LENGTH_SHORT);
             }
         }
         mainWifi.startScan();
-
-
-
     }
 
 }

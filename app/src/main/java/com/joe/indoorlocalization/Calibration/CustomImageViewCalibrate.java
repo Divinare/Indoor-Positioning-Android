@@ -33,8 +33,4 @@ public class CustomImageViewCalibrate extends CustomImageView {
         yTextView.setText("y: " + y);
     }
 
-    @Override
-    public void setText() {
-    }
-
 }

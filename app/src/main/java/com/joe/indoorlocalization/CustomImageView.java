@@ -51,13 +51,6 @@ public class CustomImageView extends ImageView {
 
     }
 
-    public CustomImageView(Context context, Drawer drawer) {
-        super(context);
-        sharedConstructing(context);
-        this.drawer = drawer;
-        Log.d(TAG, "Drawer set");
-    }
-
     public CustomImageView(Context context, AttributeSet attrs, Drawer drawer) {
         super(context, attrs);
         sharedConstructing(context);
@@ -70,20 +63,8 @@ public class CustomImageView extends ImageView {
         super(context, attrs);
         sharedConstructing(context);
         Log.d(TAG, "Drawer not set2");
-
     }
 
-    // This method should be overwritten
-    public void setText() {
-
-    }
-
-    public void setX(float x) {
-
-    }
-    public void setY(float y) {
-
-    }
     private void sharedConstructing(Context context) {
         super.setClickable(true);
         this.context = context;
@@ -102,11 +83,6 @@ public class CustomImageView extends ImageView {
                 Point curr = new Point((int)event.getX(), (int)event.getY());
 
                 Point imagePoint = convertScreenPointToImagePointFromEvent(event);
-
-                if(isInsideImage(imagePoint)) {
-                    setX(imagePoint.x);
-                    setY(imagePoint.y);
-                }
 
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
@@ -246,7 +222,7 @@ public class CustomImageView extends ImageView {
 
         if(drawer != null) {
             Log.d(TAG, "calling drawer");
-            drawer.draw(canvas, this, last);
+            drawer.draw(canvas, context, this, last);
         } else {
             Log.d(TAG, "drawer was null :(");
         }

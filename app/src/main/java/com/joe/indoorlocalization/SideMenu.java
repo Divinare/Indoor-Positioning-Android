@@ -36,7 +36,7 @@ public class SideMenu extends AppCompatActivity {
     private ArrayAdapter<String> mAdapter;
     private DrawerLayout mDrawerLayout;
 
-    private int currentFloor = 1;
+    private ApplicationState state;
     private TreeMap<Integer, String> blueprints = new TreeMap<>();
 
     public SideMenu(Activity activity) {
@@ -45,19 +45,16 @@ public class SideMenu extends AppCompatActivity {
 
     public void initSideMenu(String className, Context context) {
         this.className = className;
+        this.state = ((IndoorLocalization)context.getApplicationContext()).getApplicationState();
         mDrawerList = (ListView) activity.findViewById(R.id.navList);
         mDrawerLayout = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
         Log.d(TAG, mDrawerLayout.toString());
         dynamicallyAddBlueprints();
-        addSideMenuItems(context);
+        addSideMenuItems();
         setupSideMenu();
     }
 
-    public int getCurrentFloor() {
-        return this.currentFloor;
-    }
-
-    private void addSideMenuItems(Context context) {
+    private void addSideMenuItems() {
         String[] sideMenuListNames = new String[blueprints.size()];
         int index = 0;
         for (HashMap.Entry<Integer, String> entry : blueprints.entrySet()) {
@@ -85,7 +82,7 @@ public class SideMenu extends AppCompatActivity {
     private void selectItem(int position) {
         Log.i(TAG, "position " + position + " clicked");
         int floorNumber = Integer.parseInt(blueprints.keySet().toArray()[position].toString());
-        this.currentFloor = floorNumber;
+        this.state.setZ(floorNumber);
         setFloorText(floorNumber);
         changeFloor(floorNumber);
         mDrawerList.setItemChecked(position, true);
@@ -108,27 +105,6 @@ public class SideMenu extends AppCompatActivity {
     }
 
     private void changeFloor(int floor) {
-/*
-        CustomImageViewLocate imageView = (CustomImageViewLocate) activity.findViewById(R.id.customImageViewLocate);
-        switch(floor) {
-            case 0:
-                imageView.setImageResource(R.drawable.exactum0);
-                break;
-            case 1:
-                imageView.setImageResource(R.drawable.exactum1);
-                break;
-            case 2:
-                imageView.setImageResource(R.drawable.exactum2);
-                break;
-            case 3:
-                imageView.setImageResource(R.drawable.exactum3);
-                break;
-            case 4:
-                imageView.setImageResource(R.drawable.exactum4);
-                break;
-        }
-        */
-
         if(className.equals("locate")) {
             CustomImageViewLocate imageView = (CustomImageViewLocate) activity.findViewById(R.id.customImageViewLocate);
             imageView.setImageBitmap(getBitmap(floor));
@@ -168,7 +144,6 @@ public class SideMenu extends AppCompatActivity {
     }
 
     private void dynamicallyAddBlueprints() {
-
         File blueprintsDir = new File("/sdcard/Android/data/com.joe.indoorlocalization/files/Documents/blueprints/");
         if(!blueprintsDir.exists()) {
             blueprintsDir.mkdirs();
@@ -177,15 +152,14 @@ public class SideMenu extends AppCompatActivity {
         for(File blueprint : blueprintFiles) {
             Log.d(TAG, blueprint.getAbsolutePath());
             String path = blueprint.getAbsolutePath();
-            int floorNumber = getFloorNumber(blueprint.getName());
+            int floorNumber = getFloorNumberFromFileName(blueprint.getName());
             blueprints.put(floorNumber, path);
         }
     }
 
-    private int getFloorNumber(String fileName) {
+    private int getFloorNumberFromFileName(String fileName) {
         String[] tokens  = fileName.split("\\.(?=[^\\.]+$)");
         char lastChar = tokens[0].charAt(tokens[0].length() - 1); // tokens[0] is the fileName without extension (like .png)
-        Log.d(TAG, "CHAR: " + lastChar);
         return Integer.parseInt("" + lastChar);
     }
 

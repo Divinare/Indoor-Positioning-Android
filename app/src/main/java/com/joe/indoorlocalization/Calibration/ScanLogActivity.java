@@ -8,21 +8,22 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
-import com.joe.indoorlocalization.Models.Scan;
-import com.joe.indoorlocalization.Options;
+import com.joe.indoorlocalization.FileChooser;
+import com.joe.indoorlocalization.Locate.LocateActivity;
+import com.joe.indoorlocalization.Models.ImportFile;
 import com.joe.indoorlocalization.R;
-
-import java.util.List;
 
 public class ScanLogActivity extends Activity {
 
     static String TAG = "ScanLogActivity";
-
+    private ImportFile importFile;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan_log);
+        importFile = new ImportFile(this, "calibrate");
 
         LinearLayout scanLogScrollView = (LinearLayout)findViewById(R.id.scanLogLinearLayout);
 /*
@@ -69,7 +70,7 @@ public class ScanLogActivity extends Activity {
 
 
     public void showCalibration(View v) {
-        Intent intentCalibrate = new Intent(this, CalibrationActivity.class);
+        Intent intentCalibrate = new Intent(this, CalibrateActivity.class);
         startActivity(intentCalibrate);
     }
 
@@ -84,13 +85,39 @@ public class ScanLogActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        final Intent intentLocate = new Intent(this, LocateActivity.class);
+        final Intent intentCalibrate = new Intent(this, CalibrateActivity.class);
+        final Intent intentImportDatabase = new Intent(this, FileChooser.class);
 
-        Options options = new Options();
-        boolean ret = options.optionsItemSelected(item, this);
-        if (ret) {
+        int id = item.getItemId();
+        if (id == R.id.menu_locate) {
+            this.startActivity(intentLocate);
+        } else if(id == R.id.menu_calibrate) {
+            this.startActivity(intentCalibrate);
+        } else if(id == R.id.menu_import_database) {
+            this.startActivityForResult(intentImportDatabase, 1);
+            return true;
+        } else if(id == R.id.menu_help) {
             return true;
         }
+
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1) {
+            if(resultCode == Activity.RESULT_OK){
+                Log.d(TAG, "Got result!");
+                String path=data.getStringExtra("path");
+                Log.d(TAG, "result: " + path);
+                importFile.importFile(path);
+            }
+            if (resultCode == Activity.RESULT_CANCELED) {
+                Log.d(TAG, "Didnt get result from importFile");
+                Toast.makeText(this, "Couldn't get file data", Toast.LENGTH_SHORT);
+            }
+        }
     }
 
 }

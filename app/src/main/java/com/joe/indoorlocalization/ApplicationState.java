@@ -16,7 +16,8 @@ public class ApplicationState extends Application {
 
     private int x;
     private int y;
-    private int z;
+    private double z = 1.0;
+    private int currentFloor = 1;
 
     private ArrayList<FingerPrint> fingerPrints = new ArrayList();
 
@@ -44,11 +45,17 @@ public class ApplicationState extends Application {
     public void setY(int y) {
         this.y = y;
     }
-    public int getZ() {
+    public double getZ() {
         return this.z;
     }
-    public void setZ(int z) {
+    public void setZ(double z) {
         this.z = z;
+    }
+    public int getCurrentFloor() {
+        return this.currentFloor;
+    }
+    public void setCurrentFloor(int currentFloor) {
+        this.currentFloor = currentFloor;
     }
 
 

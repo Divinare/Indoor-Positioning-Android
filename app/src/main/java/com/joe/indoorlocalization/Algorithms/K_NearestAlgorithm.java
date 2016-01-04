@@ -22,32 +22,23 @@ import java.util.TreeMap;
 
 /**
  * Created by joe on 31/12/15.
- * This algorithm is taken from lecture slides. It calculates k nearest signals and calculates their average x and y
+ * This algorithm calculates k nearest signals and calculates their average z, x and y
  */
-public class DeterministicAlgorithm {
+public class K_NearestAlgorithm {
 
-    static String TAG = DeterministicAlgorithm.class.getSimpleName();
+    static String TAG = K_NearestAlgorithm.class.getSimpleName();
     private ApplicationState state;
     private CustomImageView customImageView;
 
-    public DeterministicAlgorithm(Context context) {
-        //this.state = context.ge;
+    public K_NearestAlgorithm(Context context) {
         this.state = ((IndoorLocalization)context.getApplicationContext()).getApplicationState();
-
-
         View rootView = ((Activity)context).getWindow().getDecorView().findViewById(android.R.id.content);
         this.customImageView = (CustomImageView)rootView.findViewById(R.id.customImageViewLocate);
-
     }
 
     public void calcLocation(StringBuilder currentFingerPrintData) {
         Log.d(TAG, "at calcLocation");
-
         String currentFP = currentFingerPrintData.toString();
-
-        Log.d(TAG, currentFP);
-
-
 
         // Expected: 2;1773.0;1776.0
         //String currentFP = "d8:b1:90:41:8a:3c;-76;00:3a:98:b9:9c:cb;-69;d8:b1:90:41:8a:3e;-73;84:b8:02:e2:a1:4c;-75;00:1d:e6:27:14:c1;-75;d8:b1:90:41:8a:3f;-74;00:3a:98:b9:9c:cd;-69;d8:b1:90:41:8a:32;-66;d8:b1:90:41:8a:30;-66;d8:b1:90:41:8a:33;-75;00:3a:98:b9:9c:ce;-69;00:3a:98:b9:9c:cc;-69;d8:b1:90:41:8a:3d;-76;d8:b1:90:41:8a:3b;-76;b0:aa:77:9f:14:43;-74;00:1d:e6:27:14:c2;-72;b0:aa:77:9f:14:40;-74;d8:b1:90:3c:83:4f;-75;d8:b1:90:3c:83:4e;-75;00:1d:e6:27:14:cd;-83;00:1d:e6:27:14:c3;-72;56:25:8d:aa:da:a8;-76;d8:b1:90:3c:83:4d;-75;d8:b1:90:3c:83:4b;-74;d8:b1:90:3c:83:4c;-74;b0:aa:77:9f:14:42;-74;b0:aa:77:9f:14:4d;-74;02:1a:11:f6:80:c2;-70;34:21:09:14:de:60;-67;00:3a:98:b9:9c:cf;-69;84:b8:02:e2:a1:4e;-79;84:b8:02:e2:a1:4d;-76;d8:b1:90:41:8d:22;-75;d8:b1:90:41:8d:23;-76;d8:b1:90:41:8d:21;-76;84:b8:02:e2:a5:9c;-77;84:b8:02:e2:a5:9b;-75;d8:b1:90:41:8d:20;-75;84:b8:02:e2:a5:9d;-77;d8:b1:90:41:8d:2d;-78;d8:b1:90:45:18:de;-90;b0:aa:77:9f:14:4b;-76;84:b8:02:e2:a5:9f;-75;84:b8:02:e2:a1:4f;-77;d8:b1:90:41:8d:2b;-78;00:1d:e6:27:14:ce;-83;5c:f8:a1:9e:dc:3e;-68;84:b8:02:e2:a5:90;-78;00:1d:e6:27:14:cc;-83;00:1d:e6:27:14:cf;-77;b0:aa:77:9f:14:4e;-74;00:1d:e6:27:14:cb;-83;b0:aa:77:a8:cf:ec;-84;58:97:bd:62:03:93;-84;84:b8:02:e2:a5:9e;-76;d8:b1:90:41:8a:31;-76;84:b8:02:e2:a5:92;-80;b0:aa:77:a8:cf:ed;-82;34:62:88:ea:0b:2d;-88;b0:aa:77:a8:cf:ee;-82;58:97:bd:62:03:9d;-85;b0:aa:77:a8:b5:82;-90;b0:aa:77:a8:cf:eb;-81;b0:aa:77:a8:cf:ef;-84;34:62:88:ea:0b:2f;-89;34:62:88:ea:0b:2b;-87;34:62:88:ea:0b:2c;-88;58:97:bd:62:03:9c;-85;b0:aa:77:a8:b5:80;-90;b0:aa:77:a8:b5:83;-90;d8:b1:90:41:8d:2e;-81;84:b8:02:e2:a5:91;-77;b0:aa:77:9f:12:cd;-89;58:97:bd:62:03:91;-89;d8:b1:90:41:8d:2c;-79;58:97:bd:6e:b0:bc;-89;84:b8:02:e2:a5:93;-78;00:1d:e6:27:14:c0;-70;b0:aa:77:9f:14:4c;-74;58:97:bd:62:03:90;-83;b0:aa:77:9f:12:cb;-89;34:62:88:ea:0b:22;-84;58:97:bd:6e:b0:bd;-90;b0:aa:77:cc:d3:e2;-88;b0:aa:77:9f:14:4f;-74;d8:b1:90:41:8d:2f;-76;34:62:88:ea:0b:23;-84;b0:aa:77:cc:d3:ec;-85;b0:aa:77:9f:12:cc;-91;58:97:bd:6e:b0:b3;-86;d8:b1:90:3c:76:03;-88;58:97:bd:6e:b0:bb;-92;58:97:bd:62:03:92;-84;d8:b1:90:3c:76:0e;-91;b0:aa:77:9f:12:cf;-87;58:97:bd:6e:b0:bf;-90;b0:aa:77:cc:d3:e0;-89";
@@ -74,7 +65,7 @@ public class DeterministicAlgorithm {
             Log.d(TAG, "z: " + f.getZ() + " x: " + f.getX() + " y: " + f.getY());
             Log.d(TAG, "scans size: " + f.getScans().size());
             for(Scan scan : f.getScans()) {
-                Log.d(TAG, "Mac: " + scan.getMac() + " RSSI: " + scan.getRSSI() + " network: " + scan.getNetwork());
+                //Log.d(TAG, "Mac: " + scan.getMac() + " RSSI: " + scan.getRSSI() + " network: " + scan.getNetwork());
             }
 
         }
@@ -96,7 +87,7 @@ public class DeterministicAlgorithm {
         int zSumAverage = 0;
         float xSumAverage = 0;
         float ySumAverage = 0;
-
+        int averageSums = 0; // How many times zSumAverage, xSumAverage, ySumAverage have been increased
         for(int i = 0; i < currentFPArray.length-1; i=i+2) {
             String currentMac = currentFPArray[i]; // list goes mac;rssi;mac;rssi...
             String currentRSSI = currentFPArray[i+1];
@@ -111,9 +102,6 @@ public class DeterministicAlgorithm {
                     scansByMacId.add(scan);
                 }
             }
-
-            //List<Scan> scans = Scan.find(Scan.class, "mac = ?", currentMac);
-
             Map<Integer, Scan> distances = new HashMap<>();
 
             // Making distances array
@@ -145,36 +133,36 @@ public class DeterministicAlgorithm {
             }
             if(nodes > 0) {
                 // Calc average of fingerPrints with mac currentMac
-                double division = ((double)zSum / (double)nodes);
-                int zAverage = (int)(division + 0.5);
+                Log.d(TAG, "zSum: " + zSum + " nodes " + nodes);
+                float zAverage = (float)zSum/(float)nodes;
+                Log.d(TAG, "Resss: " + zAverage);
                 float xAverage = Math.round(xSum / nodes);
                 float yAverage = Math.round(ySum / nodes);
-
+                Log.d(TAG, "zAverage: " + zAverage);
                 zSumAverage += zAverage;
                 xSumAverage += xAverage;
                 ySumAverage += yAverage;
+                averageSums++;
             }
         }
-        int fpsLength = currentFPArray.length/2;
-        double division = ((double)zSumAverage/(double)fpsLength);
-        int z = (int)(division + 0.5);
-        int x = (int)Math.round(xSumAverage/fpsLength);
-        int y = (int)Math.round(ySumAverage/fpsLength);
-        //this.x = x;
-        //this.y = y;
+        if(averageSums > 0) {
+            Log.d(TAG, "averageSums: " + averageSums + " zSumAverage: " + zSumAverage);
+            float z = ((float)zSumAverage/(float)averageSums);
+            int x = Math.round(xSumAverage/averageSums);
+            int y = Math.round(ySumAverage/averageSums);
+            handleResults(z, x, y);
+            Log.i(TAG, "RESULT: z: " + z + " x: " + x + " y: " + y);
+        } else {
+            Log.d(TAG, "Error at determistic algorithm, was not able to find familiar mac addresses");
+        }
+    }
 
-
-        //int x = 100;
-       // int y = 350;
-       // int z = 1;
-
-        Log.i(TAG, "RESULT: z: " + z + " x: " + x + " y: " + y);
-        //customImageViewLocate.draw(x, y);
+    public void handleResults(float z, int x, int y) {
         state.setX(x);
         state.setY(y);
         state.setZ(z);
-
         customImageView.invalidate();
+
         // TODO; change floor if the "setting" is on
     }
 

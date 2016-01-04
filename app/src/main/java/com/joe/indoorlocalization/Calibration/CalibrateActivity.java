@@ -1,5 +1,6 @@
 package com.joe.indoorlocalization.Calibration;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -23,11 +24,13 @@ import android.widget.Toast;
 
 import com.joe.indoorlocalization.ApplicationState;
 import com.joe.indoorlocalization.CustomImageView;
+import com.joe.indoorlocalization.FileChooser;
 import com.joe.indoorlocalization.IndoorLocalization;
+import com.joe.indoorlocalization.Locate.LocateActivity;
 import com.joe.indoorlocalization.Models.FingerPrint;
+import com.joe.indoorlocalization.Models.ImportFile;
 import com.joe.indoorlocalization.Models.Scan;
 import com.joe.indoorlocalization.SideMenu;
-import com.joe.indoorlocalization.Options;
 import com.joe.indoorlocalization.R;
 
 import java.io.File;
@@ -36,11 +39,11 @@ import java.io.OutputStream;
 import java.util.List;
 
 
-public class CalibrationActivity extends AppCompatActivity {
+public class CalibrateActivity extends AppCompatActivity {
 
-    static String TAG = CalibrationActivity.class.getSimpleName();
+    static String TAG = CalibrateActivity.class.getSimpleName();
 
-    SideMenu drawer = new SideMenu(this);
+    SideMenu sideMenu = new SideMenu(this);
     private CustomImageView customImageView;
 
 
@@ -56,7 +59,7 @@ public class CalibrationActivity extends AppCompatActivity {
     private StringBuilder networks;
 
     private ApplicationState state;
-
+    private ImportFile importFile;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -65,11 +68,11 @@ public class CalibrationActivity extends AppCompatActivity {
 
         customImageView = (CustomImageView) findViewById(R.id.customImageViewCalibrate);
 
-        getSupportActionBar().setTitle("Calibrate");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        drawer.initSideMenu("calibration", this);
+        sideMenu.initSideMenu("calibration", this);
 
         mainWifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
@@ -80,6 +83,7 @@ public class CalibrationActivity extends AppCompatActivity {
         progressDialog= new ProgressDialog(this);
         setupProgressDialog();
         this.state = ((IndoorLocalization)getApplicationContext()).getApplicationState();
+        importFile = new ImportFile(this, "calibrate");
     }
 
     protected void onPause() {
@@ -155,8 +159,8 @@ public class CalibrationActivity extends AppCompatActivity {
 
         progressDialog.setButton(ProgressDialog.BUTTON_POSITIVE, "Save", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-                if(fingerPrintData == null) {
-                    Toast.makeText(CalibrationActivity.this, "fingerPrintData was null :( but its ok :D", Toast.LENGTH_LONG).show();
+                if (fingerPrintData == null) {
+                    Toast.makeText(CalibrateActivity.this, "fingerPrintData was null :( but its ok :D", Toast.LENGTH_LONG).show();
                     return;
                 }
                 Log.d(TAG, "Saving to file: " + fingerPrintData.toString());
@@ -180,7 +184,7 @@ public class CalibrationActivity extends AppCompatActivity {
 
     private void showScanResults() {
 
-        Dialog dialog = new Dialog(CalibrationActivity.this);
+        Dialog dialog = new Dialog(CalibrateActivity.this);
         dialog.setContentView(R.layout.popup_dialog);
         dialog.setTitle("Hello");
         TextView dialogTextView = (TextView) dialog.findViewById(R.id.popupDialog);
@@ -196,7 +200,7 @@ public class CalibrationActivity extends AppCompatActivity {
         Point point = customImageView.getLastPoint();
         float x = point.x;
         float y = point.y;
-        int z = drawer.getCurrentFloor();
+        int z = this.state.getCurrentFloor();
         FingerPrint fp = new FingerPrint(z, x, y);
 
         String[] fpDataArray = fpData.toString().split(";");
@@ -212,22 +216,17 @@ public class CalibrationActivity extends AppCompatActivity {
     }
 
     private void saveFingerPrintIntoFile(StringBuilder fingerPrintData) {
+        Log.d(TAG, "Trying to save file...");
         String fileName = "dataJoe.txt";
-
         File file = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), fileName);
-
-        Log.i(TAG, "Trying to save file...");
-
-
-        //StringBuilder fingerPrintData = wifiScanner.getFingerPrintData();
         Point point = customImageView.getLastPoint();
         float x = point.x;
         float y = point.y;
-        int z = drawer.getCurrentFloor();
-
+        int z = this.state.getCurrentFloor();
+        Log.d(TAG, "ZZZ: " + z);
         // FORMAT: z;x;y;mac;rssi;mac;rssi;mac;rssi...
         String row = z + ";" + x + ";" + y + ";" + fingerPrintData.toString();
-        Toast.makeText(CalibrationActivity.this, "Saving: " + row, Toast.LENGTH_SHORT).show();
+        Toast.makeText(CalibrateActivity.this, "Saving: " + row, Toast.LENGTH_SHORT).show();
         Log.d(TAG, "Saving: " + row);
 
         try {
@@ -260,16 +259,42 @@ public class CalibrationActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (sideMenu.mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+        final Intent intentLocate = new Intent(this, LocateActivity.class);
+        final Intent intentCalibrate = new Intent(this, CalibrateActivity.class);
+        final Intent intentImportDatabase = new Intent(this, FileChooser.class);
 
-        if (drawer.mDrawerToggle.onOptionsItemSelected(item)) {
+        int id = item.getItemId();
+        if (id == R.id.menu_locate) {
+            this.startActivity(intentLocate);
+        } else if(id == R.id.menu_calibrate) {
+            this.startActivity(intentCalibrate);
+        } else if(id == R.id.menu_import_database) {
+            this.startActivityForResult(intentImportDatabase, 1);
+            return true;
+        } else if(id == R.id.menu_help) {
             return true;
         }
 
-        Options options = new Options();
-        boolean ret = options.optionsItemSelected(item, this);
-        if (ret) {
-            return true;
-        }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1) {
+            if(resultCode == Activity.RESULT_OK){
+                Log.d(TAG, "Got result!");
+                String path=data.getStringExtra("path");
+                Log.d(TAG, "result: " + path);
+                importFile.importFile(path);
+            }
+            if (resultCode == Activity.RESULT_CANCELED) {
+                Log.d(TAG, "Didnt get result from importFile");
+                Toast.makeText(this, "Couldn't get file data", Toast.LENGTH_SHORT);
+            }
+        }
+        mainWifi.startScan();
     }
 }

@@ -28,12 +28,12 @@ public class CustomImageViewLocate extends CustomImageView {
    // }
 
     public CustomImageViewLocate(Context context, AttributeSet attr) {
-        super(context, attr, new DrawerLocate(context));
+        super(context, attr, new DrawerLocate());
     }
 
-    @Override
-    public void setText() {
-        TextView test = (TextView) ((Activity) getContext()).findViewById(R.id.locationCoordinates);
-    }
+ //   @Override
+  //  public void setText() {
+  //      TextView test = (TextView) ((Activity) getContext()).findViewById(R.id.locationCoordinates);
+  //  }
 
 }

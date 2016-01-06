@@ -3,13 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto" >
 
     <item
-        android:id="@+id/menu_locate"
+        android:id="@+id/menu_viewSwitch"
         android:title="Locate"
         app:showAsAction="always" />
     <item
-        android:id="@+id/menu_calibrate"
-        android:title="Calibrate"
-        app:showAsAction="always" />
+        android:id="@+id/menu_lockPoint"
+        android:title="showScans"
+        app:showAsAction="always"
+        android:icon="@drawable/lock"/>
+    <item
+        android:id="@+id/menu_showScans"
+        android:title="showScans"
+        app:showAsAction="always"
+        android:icon="@drawable/show_scans"/>
     <item
         android:id="@+id/menu_import_database"
         android:title="@string/menu_import_database" />

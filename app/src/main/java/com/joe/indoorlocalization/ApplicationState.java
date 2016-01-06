@@ -2,10 +2,9 @@ package com.joe.indoorlocalization;
 
 import android.app.Application;
 
+import com.joe.indoorlocalization.Calibration.CalibrationState;
 import com.joe.indoorlocalization.Models.FingerPrint;
-import com.joe.indoorlocalization.Models.Scan;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -13,11 +12,13 @@ import java.util.ArrayList;
  */
 public class ApplicationState extends Application {
 
+    public CalibrationState calibrationState = new CalibrationState();
 
     private int x;
     private int y;
     private double z = 1.0;
     private int currentFloor = 1;
+
 
     private ArrayList<FingerPrint> fingerPrints = new ArrayList();
 

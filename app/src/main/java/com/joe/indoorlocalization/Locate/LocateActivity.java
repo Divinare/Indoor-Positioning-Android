@@ -191,19 +191,28 @@ public class LocateActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem menuViewSwitch = menu.findItem(R.id.menu_viewSwitch);
+        menuViewSwitch.setTitle("Calibrate");
+
+        MenuItem menuShowScans = menu.findItem(R.id.menu_showScans);
+        menuShowScans.setVisible(false);
+        MenuItem menuLockPoint = menu.findItem(R.id.menu_lockPoint);
+        menuLockPoint.setVisible(false);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (sideMenu.mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
 
-        final Intent intentLocate = new Intent(this, LocateActivity.class);
         final Intent intentCalibrate = new Intent(this, CalibrateActivity.class);
         final Intent intentImportDatabase = new Intent(this, FileChooser.class);
 
         int id = item.getItemId();
-        if (id == R.id.menu_locate) {
-            this.startActivity(intentLocate);
-        } else if(id == R.id.menu_calibrate) {
+        if (id == R.id.menu_viewSwitch) {
             this.startActivity(intentCalibrate);
         } else if(id == R.id.menu_import_database) {
             this.startActivityForResult(intentImportDatabase, 1);

@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -84,6 +85,8 @@ public class CalibrateActivity extends AppCompatActivity {
         setupProgressDialog();
         this.state = ((IndoorLocalization)getApplicationContext()).getApplicationState();
         importFile = new ImportFile(this, "calibrate");
+        Button startScanButton = (Button) findViewById(R.id.btnStartScan);
+        startScanButton.setEnabled(false);
     }
 
     protected void onPause() {
@@ -137,13 +140,7 @@ public class CalibrateActivity extends AppCompatActivity {
     }
 
 
-
-
-    public void saveRecord(View v) {
-        startScan();
-    }
-
-    public void startScan() {
+    public void startScan(View v) {
         Log.d(TAG, "scan started!");
         mainWifi.startScan();
         progressDialog.setTitle("Training");
@@ -243,9 +240,8 @@ public class CalibrateActivity extends AppCompatActivity {
         }
     }
 
-    public void showScanLog(View v) {
-        Intent intentScanLog = new Intent(this, ScanLogActivity.class);
-        startActivity(intentScanLog);
+    private void showScansOnScreen() {
+
     }
 
 
@@ -258,6 +254,18 @@ public class CalibrateActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem menuViewSwitch = menu.findItem(R.id.menu_viewSwitch);
+        menuViewSwitch.setTitle("Locate");
+
+        MenuItem menuShowScans = menu.findItem(R.id.menu_showScans);
+        menuShowScans.setVisible(true);
+        MenuItem menuLockPoint = menu.findItem(R.id.menu_lockPoint);
+        menuLockPoint.setVisible(true);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (sideMenu.mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
@@ -267,15 +275,18 @@ public class CalibrateActivity extends AppCompatActivity {
         final Intent intentImportDatabase = new Intent(this, FileChooser.class);
 
         int id = item.getItemId();
-        if (id == R.id.menu_locate) {
+        if (id == R.id.menu_viewSwitch) {
             this.startActivity(intentLocate);
-        } else if(id == R.id.menu_calibrate) {
-            this.startActivity(intentCalibrate);
         } else if(id == R.id.menu_import_database) {
             this.startActivityForResult(intentImportDatabase, 1);
             return true;
         } else if(id == R.id.menu_help) {
             return true;
+        } else if(id == R.id.menu_showScans) {
+            this.state.calibrationState.toggleShowingScans();
+            customImageView.invalidate();
+        } else if(id == R.id.menu_lockPoint) {
+            state.calibrationState.lockSelectedPoint();
         }
 
         return super.onOptionsItemSelected(item);

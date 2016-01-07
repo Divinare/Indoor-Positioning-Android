@@ -30,7 +30,7 @@ public class ApplicationState extends Application {
         this.fingerPrints.add(fp);
     }
 
-    public ArrayList getFingerPrints() {
+    public ArrayList<FingerPrint> getFingerPrints() {
         return this.fingerPrints;
     }
 

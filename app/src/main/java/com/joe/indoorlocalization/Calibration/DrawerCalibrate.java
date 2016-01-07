@@ -27,16 +27,17 @@ public class DrawerCalibrate extends Drawer {
 
     static String TAG = DrawerCalibrate.class.getSimpleName();
     private ApplicationState state;
+    private CalibrationState cState;
     private Context context;
 
     public DrawerCalibrate(Context context) {
         this.context = context;
         this.state = ((IndoorLocalization)context.getApplicationContext()).getApplicationState();
+        this.cState = this.state.calibrationState;
     }
 
     private void drawScans(Canvas canvas, Context context, CustomImageView view) {
-        ArrayList<FingerPrint> fps = this.state.getFingerPrints();
-        for(FingerPrint fp: fps) {
+        for(FingerPrint fp: this.state.getFingerPrints()) {
             Point screenPoint = view.convertImagePointToScreenPoint(new Point((int) fp.getX(), (int) fp.getY()));
 
             Paint paint = new Paint();
@@ -50,7 +51,6 @@ public class DrawerCalibrate extends Drawer {
 
     private void lineCalibrate(Canvas canvas, Context context, CustomImageView view, Point screenPoint) {
         Log.d(TAG, "at drawScanLine");
-        CalibrationState cState = state.calibrationState;
         if(cState.getLockToDrawing()) {
             Log.d(TAG, "Drawing was locked.");
             drawPointsAndLine(canvas, view, cState);
@@ -85,6 +85,7 @@ public class DrawerCalibrate extends Drawer {
                 Log.d(TAG, "Points weren't selectable, should they be?");
             }
         } else if(!cState.getSelectedPoint().equals("")) {
+            Log.d(TAG, "SELEEEECT!!");
             if(cState.getSelectedPoint().equals("point1") && !cState.point1Locked)  {
                 cState.point1 = new Point(imagePoint.x, imagePoint.y);
             } else if(cState.getSelectedPoint().equals("point2") && !cState.point2Locked){
@@ -102,7 +103,9 @@ public class DrawerCalibrate extends Drawer {
         if(cState.pointsExist()) {
             View rootView = ((Activity) context).getWindow().getDecorView().findViewById(android.R.id.content);
             Button startScanButton = (Button) rootView.findViewById(R.id.btnStartRecording);
-            startScanButton.setEnabled(true);
+            if(startScanButton != null) {
+                startScanButton.setEnabled(true);
+            }
         }
     }
 
@@ -173,7 +176,9 @@ public class DrawerCalibrate extends Drawer {
 
     @Override
     public void draw(Canvas canvas, Context context, CustomImageView view, Point screenPoint) {
-
+        if(cState.point1 != null) {
+            Log.d(TAG, "POINT 1 : " + cState.point1.x + " " + cState.point1.y);
+        }
         if(this.state.calibrationState.showingScans()) {
             Log.d(TAG, "at calibrate draw, return cuz showing scans");
             drawScans(canvas, context, view);

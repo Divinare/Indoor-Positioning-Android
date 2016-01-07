@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.joe.indoorlocalization.Algorithms.K_NearestAlgorithm;
 import com.joe.indoorlocalization.Calibration.CalibrateActivity;
 import com.joe.indoorlocalization.FileChooser;
+import com.joe.indoorlocalization.Models.ExportFile;
 import com.joe.indoorlocalization.Models.ImportFile;
 import com.joe.indoorlocalization.SideMenu;
 import com.joe.indoorlocalization.R;
@@ -210,6 +211,7 @@ public class LocateActivity extends AppCompatActivity {
 
         final Intent intentCalibrate = new Intent(this, CalibrateActivity.class);
         final Intent intentImportDatabase = new Intent(this, FileChooser.class);
+        ExportFile exportFile = new ExportFile(this);
 
         int id = item.getItemId();
         if (id == R.id.menu_viewSwitch) {
@@ -217,6 +219,8 @@ public class LocateActivity extends AppCompatActivity {
         } else if(id == R.id.menu_import_database) {
             this.startActivityForResult(intentImportDatabase, 1);
             return true;
+        } else if(id == R.id.menu_export_database) {
+            exportFile.exportApplicationStateIntoFile();
         } else if(id == R.id.menu_help) {
             return true;
         }

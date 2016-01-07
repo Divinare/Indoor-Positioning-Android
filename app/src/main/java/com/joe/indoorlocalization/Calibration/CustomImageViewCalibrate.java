@@ -22,15 +22,15 @@ public class CustomImageViewCalibrate extends CustomImageView {
 
     @Override
     public void setX(float x) {
-        Log.d(TAG, "x:   " + x);
-        TextView xTextView = (TextView) ((Activity) getContext()).findViewById(R.id.positionX);
-        xTextView.setText("x: " + x);
+      //  Log.d(TAG, "x:   " + x);
+        //TextView xTextView = (TextView) ((Activity) getContext()).findViewById(R.id.positionX);
+        //xTextView.setText("x: " + x);
     }
 
     @Override
     public void setY(float y) {
-        TextView yTextView = (TextView) ((Activity) getContext()).findViewById(R.id.positionY);
-        yTextView.setText("y: " + y);
+       // TextView yTextView = (TextView) ((Activity) getContext()).findViewById(R.id.positionY);
+        //yTextView.setText("y: " + y);
     }
 
 }

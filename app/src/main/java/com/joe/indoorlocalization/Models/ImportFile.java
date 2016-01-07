@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /**
+ * Imports a file to the ApplicationState as objects
  * Created by joe on 02/01/16.
  */
 public class ImportFile {

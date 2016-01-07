@@ -17,6 +17,8 @@ public class CalibrationState {
     public boolean point2Locked = false;
 
     private boolean pointsSelectable = true;
+
+    // Means that you can't select or reposition any points
     private boolean lockToDrawing = false;
 
     public String getSelectedPoint() {
@@ -44,6 +46,9 @@ public class CalibrationState {
     }
 
     public void lockSelectedPoint() {
+        if(this.point1 == null && this.point2 == null) {
+            return;
+        }
         if(this.selectedPoint.equals("point1")) {
             point1Locked = true;
             if(point2 == null) {

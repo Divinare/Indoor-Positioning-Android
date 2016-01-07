@@ -5,5 +5,9 @@
     <item type="id" name="btnStopRecording" />
     <item type="id" name="btnSaveRecording" />
     <item type="id" name="btnDismissRecording" />
+    <item type="id" name="progressbar_relativeLayout" />
+    <item type="id" name="scanCount" />
+
+
 
 </resources>

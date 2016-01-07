@@ -18,9 +18,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:id="@+id/calibrationTopBar"
@@ -114,9 +112,10 @@
 
         <LinearLayout
             android:id="@+id/calibrationBottomBar"
+            android:background="#000"
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_centerHorizontal="true"
             android:layout_alignParentBottom="true">
 

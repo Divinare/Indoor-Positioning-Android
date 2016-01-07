@@ -218,13 +218,8 @@ public class CustomImageView extends ImageView {
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        Log.d(TAG, "at on draw");
-
         if(drawer != null) {
-            Log.d(TAG, "calling drawer");
             drawer.draw(canvas, context, this, last);
-        } else {
-            Log.d(TAG, "drawer was null :(");
         }
     }
 

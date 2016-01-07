@@ -9,12 +9,32 @@ public class CalibrationState {
 
     private boolean showingScans = false;
 
-    public String selectedPoint = "point1";
+    private String selectedPoint = "point1";
     public Point point1 = null;
     public boolean point1Locked = false;
 
     public Point point2 = null;
     public boolean point2Locked = false;
+
+    private boolean pointsSelectable = true;
+    private boolean lockToDrawing = false;
+
+    public String getSelectedPoint() {
+        return this.selectedPoint;
+    }
+
+    public void setSelectedPoint(String point) {
+        // Dont allow selecting a point if one of the points is unlocked
+        if(!this.point1Locked || !this.point2Locked) {
+            return;
+        }
+        this.selectedPoint = point;
+        if(point.equals("point1")) {
+            this.point1Locked = false;
+        } else {
+            this.point2Locked = false;
+        }
+    }
 
     public void toggleShowingScans() {
         this.showingScans = !this.showingScans;
@@ -37,16 +57,25 @@ public class CalibrationState {
         }
     }
 
-    public void setSelectedPoint(String point) {
-        // Dont allow selecting a point if one of the points is unlocked
-        if(!this.point1Locked || !this.point2Locked) {
-            return;
+    public boolean pointsExist() {
+        if(this.point1 != null && this.point2 != null) {
+            return true;
         }
-        this.selectedPoint = point;
-        if(point.equals("point1")) {
-            this.point1Locked = false;
-        } else {
-            this.point2Locked = false;
-        }
+        return false;
+    }
+
+    public void setPointsSelectable(boolean selectable) {
+        this.pointsSelectable = selectable;
+    }
+
+    public boolean pointsSelectable() {
+        return this.pointsSelectable;
+    }
+
+    public void setLockToDrawing(boolean lock) {
+        this.lockToDrawing = lock;
+    }
+    public boolean getLockToDrawing() {
+        return this.lockToDrawing;
     }
 }

@@ -50,7 +50,12 @@ public class DrawerCalibrate extends Drawer {
 
     private void lineCalibrate(Canvas canvas, Context context, CustomImageView view, Point screenPoint) {
         Log.d(TAG, "at drawScanLine");
-
+        CalibrationState cState = state.calibrationState;
+        if(cState.getLockToDrawing()) {
+            Log.d(TAG, "Drawing was locked.");
+            drawPointsAndLine(canvas, view, cState);
+            return;
+        }
         Point imagePoint = view.convertScreenPointToImagePoint(new Point(screenPoint.x, screenPoint.y));
 
         //Not drawing outside of the image
@@ -58,34 +63,31 @@ public class DrawerCalibrate extends Drawer {
             return;
         }
 
-        CalibrationState cState = state.calibrationState;
-
         int distanceForPoint1 = Integer.MAX_VALUE;
         int distanceForPoint2 = Integer.MAX_VALUE;
-
         int maxDistanceForSelection = 150; // Todo, calc it by looking screen width + also zoom level could affect it!
 
-        if(cState.point1 != null) {
+        if (cState.point1 != null) {
             distanceForPoint1 = calcDistanceBetweenTwoPoints(cState.point1, imagePoint);
         }
-        if(cState.point2 != null) {
+        if (cState.point2 != null) {
             distanceForPoint2 = calcDistanceBetweenTwoPoints(cState.point2, imagePoint);
         }
-        Log.d(TAG, "point1 locked? " + cState.point1Locked + " " + distanceForPoint1);
-        Log.d(TAG, "point2 locked? " + cState.point2Locked + " " + distanceForPoint2);
-
-        if((cState.point1Locked &&distanceForPoint1 < maxDistanceForSelection) || (cState.point2Locked && distanceForPoint2 < maxDistanceForSelection)) {
-            Log.d(TAG, "selecting a point! " + distanceForPoint1 + " " + distanceForPoint2);
-            if(distanceForPoint1 < distanceForPoint2) {
-                cState.setSelectedPoint("point1");
+        // Handle selection of points
+        if ((cState.point1Locked && distanceForPoint1 < maxDistanceForSelection) || (cState.point2Locked && distanceForPoint2 < maxDistanceForSelection)) {
+            if(cState.pointsSelectable()) {
+                if (distanceForPoint1 < distanceForPoint2) {
+                    cState.setSelectedPoint("point1");
+                } else {
+                    cState.setSelectedPoint("point2");
+                }
             } else {
-                cState.setSelectedPoint("point2");
+                Log.d(TAG, "Points weren't selectable, should they be?");
             }
-        } else if(!cState.selectedPoint.equals("")) {
-            Log.d(TAG, "drawing a point!!! , " + cState.selectedPoint);
-            if(cState.selectedPoint.equals("point1") && !cState.point1Locked)  {
+        } else if(!cState.getSelectedPoint().equals("")) {
+            if(cState.getSelectedPoint().equals("point1") && !cState.point1Locked)  {
                 cState.point1 = new Point(imagePoint.x, imagePoint.y);
-            } else if(cState.selectedPoint.equals("point2") && !cState.point2Locked){
+            } else if(cState.getSelectedPoint().equals("point2") && !cState.point2Locked){
                 cState.point2 = new Point(imagePoint.x, imagePoint.y);
             }
 
@@ -96,20 +98,21 @@ public class DrawerCalibrate extends Drawer {
             yTextView.setText("y: " + imagePoint.y);
 
         }
+        drawPointsAndLine(canvas, view, cState);
+        if(cState.pointsExist()) {
+            View rootView = ((Activity) context).getWindow().getDecorView().findViewById(android.R.id.content);
+            Button startScanButton = (Button) rootView.findViewById(R.id.btnStartRecording);
+            startScanButton.setEnabled(true);
+        }
+    }
+
+    private void drawPointsAndLine(Canvas canvas, CustomImageView view, CalibrationState cState) {
         drawPoint(canvas, view, cState.point1);
         drawPoint(canvas, view, cState.point2);
 
-        Log.d(TAG, "hmm? " + (cState.point1 != null));
-        Log.d(TAG, "hmm? " + (cState.point2 != null));
-        if(cState.point1 != null && cState.point2 != null) {
-            Log.d(TAG, "Should draw line");
+        if(cState.pointsExist()) {
             drawLine(canvas, view, cState.point1, cState.point2);
-            View rootView = ((Activity)context).getWindow().getDecorView().findViewById(android.R.id.content);
-            Button startScanButton = (Button)rootView.findViewById(R.id.btnStartScan);
-            startScanButton.setEnabled(true);
         }
-
-
     }
 
     //       ____________________
@@ -123,7 +126,6 @@ public class DrawerCalibrate extends Drawer {
         Point screenPoint1 = view.convertImagePointToScreenPoint(new Point(imagePoint1.x, imagePoint1.y));
         Point screenPoint2 = view.convertImagePointToScreenPoint(new Point(imagePoint2.x, imagePoint2.y));
 
-        Log.d(TAG, "Drawing line! ");
         int startX = screenPoint1.x;
         int startY = screenPoint1.y;
         int stopX = screenPoint2.x;
@@ -133,9 +135,6 @@ public class DrawerCalibrate extends Drawer {
         paint.setAntiAlias(true);
         paint.setDither(true);
         paint.setColor(Color.RED);
-//        paint.setStyle(Paint.Style.STROKE);
- //       paint.setStrokeJoin(Paint.Join.ROUND);
-        // mPaint.setStrokeCap(Paint.Cap.ROUND);
         paint.setStrokeWidth(10);
 
         canvas.drawLine(startX, startY, stopX, stopY, paint);

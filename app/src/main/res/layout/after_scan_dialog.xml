@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#000">
+
+    <TextView
+        android:id="@+id/afterScanDialogTopic"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Scan ended"
+        android:textColor="#FFF"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/afterScanDialogTopic" >
+
+    <Button
+        android:id="@+id/afterScanDialogSave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        android:layout_marginTop="5dp"
+        android:layout_marginRight="5dp" />
+
+    <Button
+        android:id="@+id/afterScanDialogView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="View"
+        android:layout_marginTop="5dp"
+        android:layout_marginRight="5dp" />
+
+    <Button
+        android:id="@+id/afterScanDialogDismiss"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Dismiss"
+        android:layout_marginTop="5dp"
+        android:layout_marginRight="5dp" />
+
+    </LinearLayout>
+
+</RelativeLayout>

@@ -120,15 +120,6 @@
             android:layout_centerHorizontal="true"
             android:layout_alignParentBottom="true">
 
-            <Button
-                style="?android:attr/buttonStyleSmall"
-                android:id="@+id/btnStartScan"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:text="Start Recording"
-                android:layout_weight="1"
-                android:onClick="startScan" />
-
         </LinearLayout>
 
     </RelativeLayout>

@@ -13,13 +13,20 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,6 +44,8 @@ import com.joe.indoorlocalization.R;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -54,10 +63,14 @@ public class CalibrateActivity extends AppCompatActivity {
     private WifiReceiver receiverWifi;
     private List<ScanResult> wifiList;
 
+    // For scanning
     private int maxScans = 1;
-    private ProgressDialog progressDialog;
-    private StringBuilder fingerPrintData; // mac;rssi;mac;rssi... format
+    private boolean runningScan = false;
+    private boolean scanHasStarted = false;
+    //private ProgressDialog progressDialog;
+    //private StringBuilder fingerPrintData; // mac;rssi;mac;rssi... format
     private StringBuilder networks;
+    private ArrayList<StringBuilder> fingerPrintData = new ArrayList<>();
 
     private ApplicationState state;
     private ImportFile importFile;
@@ -80,13 +93,12 @@ public class CalibrateActivity extends AppCompatActivity {
         wakeLock = pm.newWakeLock(
                 PowerManager.SCREEN_DIM_WAKE_LOCK, "My wakelock");
         receiverWifi = new WifiReceiver();
-        this.registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-        progressDialog= new ProgressDialog(this);
-        setupProgressDialog();
+        //this.registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        //progressDialog= new ProgressDialog(this);
+        //setupProgressDialog();
         this.state = ((IndoorLocalization)getApplicationContext()).getApplicationState();
         importFile = new ImportFile(this, "calibrate");
-        Button startScanButton = (Button) findViewById(R.id.btnStartScan);
-        startScanButton.setEnabled(false);
+        createStartRecordingBtn();
     }
 
     protected void onPause() {
@@ -107,52 +119,284 @@ public class CalibrateActivity extends AppCompatActivity {
         public void onReceive(Context c, Intent intent) {
             Log.d("FINGER","FingerPrint received");
 
-            fingerPrintData = new StringBuilder();
+            StringBuilder fingerPrint = new StringBuilder();
             networks = new StringBuilder();
 
-            if (progressDialog.getProgress()<=progressDialog.getMax()) {
+            //if (progressDialog.getProgress()<=progressDialog.getMax()) {
+            if(runningScan) {
                 wifiList = mainWifi.getScanResults();
 
                 for(int j=0; j<wifiList.size(); j++) {
 
                     if(wifiList.get(j).level != 0) {
-                        fingerPrintData.append(wifiList.get(j).BSSID);
-                        fingerPrintData.append(';');
-                        fingerPrintData.append(wifiList.get(j).level);
+                        fingerPrint.append(wifiList.get(j).BSSID);
+                        fingerPrint.append(';');
+                        fingerPrint.append(wifiList.get(j).level);
                         if (j < wifiList.size() - 1) {
-                            fingerPrintData.append(";");
+                            fingerPrint.append(";");
                         }
                     }
                 }
-
-                progressDialog.incrementProgressBy(1);
+                fingerPrintData.add(fingerPrint);
+                //progressDialog.incrementProgressBy(1);
 
                 mainWifi.startScan();
+                scanHasStarted = true;
                 Log.d("FINGER","FingerPrint initiated");
-            } else {
+            } else if(scanHasStarted) {
                 try {
                     unregisterReceiver(receiverWifi);
                 } catch(Exception e) {
-                    Log.e(TAG, "couldn't unregister receiver");
+                    Log.e(TAG, "Couldn't unregister receiver");
                 }
+                handleScanEnding();
             }
         }
     }
 
 
-    public void startScan(View v) {
+    public void startScan() {
         Log.d(TAG, "scan started!");
+        this.runningScan = true;
         mainWifi.startScan();
-        progressDialog.setTitle("Training");
-        progressDialog.show();
+        scanHasStarted = true;
+
+        //progressDialog.show();
+
+        createStartRecordingBtn();
+
+
+        /*
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.progress_dialog);
+        dialog.setTitle("Title...");
+
+        TextView text = (TextView) dialog.findViewById(R.id.text);
+        text.setText("Android custom dialog example!");
+        Button dialogButton = (Button) dialog.findViewById(R.id.dialogButtonOK);
+        dialogButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
+        final ProgressBar progressBar = (ProgressBar) dialog.findViewById(R.id.progressbar);
+        float from = 0;
+        float to = 100;
+        final ProgressBarAnimation anim = new ProgressBarAnimation(progressBar, from, to);
+        anim.setDuration(1500);
+        progressBar.startAnimation(anim);
+        animateInLoop(anim, progressBar);
+        */
+    }
+
+    private void stopScan() {
+        this.runningScan = false;
+    }
+
+    private void animateInLoop(final ProgressBarAnimation anim, final ProgressBar progressBar) {
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "At animate run...");
+                anim.setDuration(1500);
+                progressBar.startAnimation(anim);
+                animateInLoop(anim, progressBar);
+            }
+        }, 1500);
 
     }
 
+    private class ProgressBarAnimation extends Animation {
+        private ProgressBar progressBar;
+        private float from;
+        private float  to;
+        private int val = 0;
+        public ProgressBarAnimation(ProgressBar progressBar, float from, float to) {
+            super();
+            this.progressBar = progressBar;
+            this.from = from;
+            this.to = to;
+        }
+
+        @Override
+        protected void applyTransformation(float interpolatedTime, Transformation t) {
+            super.applyTransformation(interpolatedTime, t);
+            float value = from + (to - from) * interpolatedTime;
+            progressBar.setProgress((int) value);
+        }
+
+    }
+
+    // BOTTOM BAR BUTTONS
+    private void createStartRecordingBtn() {
+        removeExistingButtons();
+        this.registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        state.calibrationState.setPointsSelectable(true);
+
+        LinearLayout bottomBar = (LinearLayout) findViewById(R.id.calibrationBottomBar);
+        Button btnStartRecording = new Button(this);
+        modifyButtonStyling(btnStartRecording);
+        btnStartRecording.setId(R.id.btnStartRecording);
+        btnStartRecording.setText("Start Recording");
+        btnStartRecording.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startScan();
+                state.calibrationState.setPointsSelectable(false);
+                state.calibrationState.setLockToDrawing(true);
+                createStopRecordingBtn();
+
+            }
+        });
+
+        if(this.state.calibrationState.pointsExist()) {
+            btnStartRecording.setEnabled(true);
+        } else {
+            btnStartRecording.setEnabled(false);
+        }
+        bottomBar.addView(btnStartRecording);
+        state.calibrationState.setLockToDrawing(false);
+    }
+
+    private void createStopRecordingBtn() {
+        removeExistingButtons();
+        LinearLayout bottomBar = (LinearLayout) findViewById(R.id.calibrationBottomBar);
+
+        // REMEMBER ANIMATION
+
+        final Button btnStopRecording = new Button(this);
+        modifyButtonStyling(btnStopRecording);
+        btnStopRecording.setId(R.id.btnStopRecording);
+        btnStopRecording.setText("Stop recording");
+        btnStopRecording.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                stopScan();
+                btnStopRecording.setEnabled(false);
+            }
+        });
+        bottomBar.addView(btnStopRecording);
+    }
+
+    private void createSaveAndDismissBtn() {
+        removeExistingButtons();
+        LinearLayout bottomBar = (LinearLayout) findViewById(R.id.calibrationBottomBar);
+
+        Button btnSaveRecording = new Button(this);
+        modifyButtonStyling(btnSaveRecording);
+        btnSaveRecording.setId(R.id.btnSaveRecording);
+        btnSaveRecording.setText("Save");
+        btnSaveRecording.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "at save :) ");
+                createStartRecordingBtn();
+            }
+        });
+        bottomBar.addView(btnSaveRecording);
+
+        Button btnDismissRecording = new Button(this);
+        modifyButtonStyling(btnDismissRecording);
+        btnDismissRecording.setId(R.id.btnDismissRecording);
+        btnDismissRecording.setText("Dismiss");
+        btnDismissRecording.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fingerPrintData = new ArrayList<>(); // clear current fpData
+                createStartRecordingBtn();
+            }
+        });
+        bottomBar.addView(btnDismissRecording);
+    }
+
+    private void removeExistingButtons() {
+        Log.d(TAG, "removing existing buttons!");
+        LinearLayout bottomBar = (LinearLayout) findViewById(R.id.calibrationBottomBar);
+
+        Button startRecordingBtn = (Button) bottomBar.findViewById(R.id.btnStartRecording);
+        Button stopRecordingBtn = (Button) bottomBar.findViewById(R.id.btnStopRecording);
+        Button saveRecordingBtn = (Button) bottomBar.findViewById(R.id.btnSaveRecording);
+        Button dismissRecordingBtn = (Button) bottomBar.findViewById(R.id.btnDismissRecording);
+        removeElementIfNotNull(startRecordingBtn);
+        removeElementIfNotNull(stopRecordingBtn);
+        removeElementIfNotNull(saveRecordingBtn);
+        removeElementIfNotNull(dismissRecordingBtn);
+    }
+    private void removeElementIfNotNull(View element) {
+        if(element != null) {
+            ((ViewGroup) element.getParent()).removeView(element);
+        }
+    }
+
+    private void modifyButtonStyling(Button btn) {
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        params.weight = 1.0f;
+        btn.setLayoutParams(params);
+    }
+
+
+    private void handleScanEnding() {
+        scanHasStarted = false;
+        showAfterScanDialog();
+        Button btnStopRecording = (Button) findViewById(R.id.btnStopRecording);
+        btnStopRecording.setVisibility(View.INVISIBLE);
+    }
+
+    private void showAfterScanDialog() {
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.after_scan_dialog);
+        dialog.setTitle("Scan ended");
+
+        Button buttonSave = (Button) dialog.findViewById(R.id.afterScanDialogSave);
+        buttonSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // call save here()
+                dialog.dismiss();
+            }
+        });
+
+        Button buttonView = (Button) dialog.findViewById(R.id.afterScanDialogView);
+        buttonView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        Button buttonDismiss = (Button) dialog.findViewById(R.id.afterScanDialogDismiss);
+        buttonDismiss.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fingerPrintData = new ArrayList<>();
+                dialog.dismiss();
+            }
+        });
+
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface arg0) {
+                if(fingerPrintData.size() > 0) {
+                    createSaveAndDismissBtn();
+                } else {
+                    createStartRecordingBtn();
+                }
+            }
+        });
+
+        dialog.show();
+    }
+
+    /*
     public void setupProgressDialog() {
         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         progressDialog.setCancelable(true);
         progressDialog.setTitle("Recording");
-        progressDialog.setMax(maxScans);
+        progressDialog.setMax(10);
 
         progressDialog.setButton(ProgressDialog.BUTTON_POSITIVE, "Save", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
@@ -178,20 +422,22 @@ public class CalibrateActivity extends AppCompatActivity {
             }
         });
     }
+    */
 
+    /*
     private void showScanResults() {
 
         Dialog dialog = new Dialog(CalibrateActivity.this);
         dialog.setContentView(R.layout.popup_dialog);
-        dialog.setTitle("Hello");
+        dialog.setTitle("Scan Results");
         TextView dialogTextView = (TextView) dialog.findViewById(R.id.popupDialog);
         dialogTextView.setText(fingerPrintData.toString());
-      //  Log.d(TAG, currentFingerPrintData.toString());
         Log.d(TAG, "real currentFpData:");
         Log.d(TAG, fingerPrintData.toString());
         dialog.show();
 
     }
+    */
 
     private void saveFingerPrintIntoApplicationState(StringBuilder fpData) {
         Point point = customImageView.getLastPoint();
@@ -238,10 +484,6 @@ public class CalibrateActivity extends AppCompatActivity {
             Log.d(TAG, "Exception on data export");
             Log.d(TAG, e.getMessage());
         }
-    }
-
-    private void showScansOnScreen() {
-
     }
 
 
@@ -306,6 +548,10 @@ public class CalibrateActivity extends AppCompatActivity {
                 Toast.makeText(this, "Couldn't get file data", Toast.LENGTH_SHORT);
             }
         }
+        Log.d(TAG, "START SCANNNN3");
         mainWifi.startScan();
+        scanHasStarted = true;
     }
+
+
 }

@@ -85,7 +85,6 @@ public class DrawerCalibrate extends Drawer {
                 Log.d(TAG, "Points weren't selectable, should they be?");
             }
         } else if(!cState.getSelectedPoint().equals("")) {
-            Log.d(TAG, "SELEEEECT!!");
             if(cState.getSelectedPoint().equals("point1") && !cState.point1Locked)  {
                 cState.point1 = new Point(imagePoint.x, imagePoint.y);
             } else if(cState.getSelectedPoint().equals("point2") && !cState.point2Locked){
@@ -97,6 +96,9 @@ public class DrawerCalibrate extends Drawer {
             xTextView.setText("x: " + imagePoint.x);
             TextView yTextView = (TextView)rootView.findViewById(R.id.positionY);
             yTextView.setText("y: " + imagePoint.y);
+            TextView zTextView = (TextView)rootView.findViewById(R.id.positionZ);
+            zTextView.setText("z: " + state.getCurrentFloor());
+            Log.d(TAG, "Curr loor " + state.getCurrentFloor());
 
         }
         drawPointsAndLine(canvas, view, cState);
@@ -153,32 +155,8 @@ public class DrawerCalibrate extends Drawer {
         }
     }
 
-    private void drawCircle(Canvas canvas, Context context, CustomImageView view, Point screenPoint) {
-        Log.d(TAG, "at drawCircle");
-        Point imagePoint = view.convertScreenPointToImagePoint(new Point(screenPoint.x, screenPoint.y));
-
-        //Not drawing outside of the image
-        if(!view.isInsideImage(imagePoint)) {
-            return;
-        }
-        View rootView = ((Activity)context).getWindow().getDecorView().findViewById(android.R.id.content);
-        TextView xTextView = (TextView) rootView.findViewById(R.id.positionX);
-        xTextView.setText("x: " + imagePoint.x);
-        TextView yTextView = (TextView)rootView.findViewById(R.id.positionY);
-        yTextView.setText("y: " + imagePoint.y);
-
-        Paint paint = new Paint();
-        paint.setAntiAlias(true);
-        paint.setColor(Color.GREEN);
-
-        canvas.drawCircle(screenPoint.x, screenPoint.y, 20, paint);
-    }
-
     @Override
     public void draw(Canvas canvas, Context context, CustomImageView view, Point screenPoint) {
-        if(cState.point1 != null) {
-            Log.d(TAG, "POINT 1 : " + cState.point1.x + " " + cState.point1.y);
-        }
         if(this.state.calibrationState.showingScans()) {
             Log.d(TAG, "at calibrate draw, return cuz showing scans");
             drawScans(canvas, context, view);

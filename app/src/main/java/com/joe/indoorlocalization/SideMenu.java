@@ -83,6 +83,7 @@ public class SideMenu extends AppCompatActivity {
         Log.i(TAG, "position " + position + " clicked");
         int floorNumber = Integer.parseInt(blueprints.keySet().toArray()[position].toString());
         this.state.setZ(floorNumber);
+        this.state.setCurrentFloor(floorNumber);
         setFloorText(floorNumber);
         changeFloor(floorNumber);
         mDrawerList.setItemChecked(position, true);

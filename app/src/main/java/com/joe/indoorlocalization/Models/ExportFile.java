@@ -56,7 +56,8 @@ public class ExportFile {
            }
             os.close();
             os.flush();
-            Log.i(TAG, "File saved");
+            Log.i(TAG, "File " + fileName + " saved");
+            Toast.makeText(context, "Exported to file " + fileName + " succesfully.", Toast.LENGTH_LONG).show();
         } catch (Exception e) {
             Log.d(TAG, "Error on saving file");
             Log.d(TAG, "Exception on data export");

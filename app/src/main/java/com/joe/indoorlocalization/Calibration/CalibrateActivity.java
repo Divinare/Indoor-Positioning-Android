@@ -464,39 +464,6 @@ public class CalibrateActivity extends AppCompatActivity {
         this.fingerPrintData = new ArrayList<>();
     }
 
-
-
-    /*
-    private void saveFingerPrintIntoFile(StringBuilder fingerPrintData) {
-        Log.d(TAG, "Trying to save file...");
-        String fileName = "dataJoe.txt";
-        File file = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), fileName);
-        Point point = customImageView.getLastPoint();
-        float x = point.x;
-        float y = point.y;
-        int z = this.state.getCurrentFloor();
-        Log.d(TAG, "ZZZ: " + z);
-        // FORMAT: z;x;y;mac;rssi;mac;rssi;mac;rssi...
-        String row = z + ";" + x + ";" + y + ";" + fingerPrintData.toString();
-        Toast.makeText(CalibrateActivity.this, "Saving: " + row, Toast.LENGTH_SHORT).show();
-        Log.d(TAG, "Saving: " + row);
-
-        try {
-            OutputStream os = new FileOutputStream(file, true);
-            os.write("\n".getBytes());
-            os.write(row.getBytes());
-            os.close();
-            os.flush();
-            Log.i(TAG, "File saved");
-        } catch (Exception e) {
-            Log.d(TAG, "Error on saving file");
-            Log.d(TAG, "Exception on data export");
-            Log.d(TAG, e.getMessage());
-        }
-    }
-    */
-
-
     // OPTIONS MENU
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

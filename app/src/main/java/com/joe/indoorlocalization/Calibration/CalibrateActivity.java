@@ -167,15 +167,14 @@ public class CalibrateActivity extends AppCompatActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                Log.d(TAG, "At animate run...");
-                if(runningScan) {
-                    anim.setDuration(1500);
-                    progressBar.startAnimation(anim);
-                    animateInLoop(anim, progressBar);
-                }
+            Log.d(TAG, "At animate run...");
+            if(runningScan) {
+                anim.setDuration(1500);
+                progressBar.startAnimation(anim);
+                animateInLoop(anim, progressBar);
+            }
             }
         }, 1500);
-
     }
 
     private class ProgressBarAnimation extends Animation {
@@ -352,6 +351,10 @@ public class CalibrateActivity extends AppCompatActivity {
         if(relativeLayout != null) {
             ((ViewGroup) relativeLayout.getParent()).removeView(relativeLayout);
         }
+        TextView scanCount = (TextView) findViewById(R.id.scanCount);
+        if(scanCount != null) {
+            ((ViewGroup) scanCount.getParent()).removeView(scanCount);
+        }
     }
 
     private void showAfterScanDialog() {
@@ -499,7 +502,6 @@ public class CalibrateActivity extends AppCompatActivity {
             this.startActivityForResult(intentImportDatabase, 1);
             return true;
         } else if(id == R.id.menu_export_database) {
-            Log.d(TAG, "going to export..");
             exportFile.exportApplicationStateIntoFile();
         } else if(id == R.id.menu_help) {
             return true;

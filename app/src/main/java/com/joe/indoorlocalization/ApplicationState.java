@@ -18,7 +18,7 @@ public class ApplicationState extends Application {
     private int y;
     private double z = 1.0;
     private int currentFloor = 1;
-
+    private boolean automaticallyChangeFloor = true;
 
     private ArrayList<FingerPrint> fingerPrints = new ArrayList();
 
@@ -59,6 +59,10 @@ public class ApplicationState extends Application {
         this.currentFloor = currentFloor;
     }
 
-
-
+    public boolean getAutomaticallyChangeFloor() {
+        return this.automaticallyChangeFloor;
+    }
+    public void toggleAutomaticallyChangeFloor() {
+        this.automaticallyChangeFloor = !this.automaticallyChangeFloor;
+    }
 }

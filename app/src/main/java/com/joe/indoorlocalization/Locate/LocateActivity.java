@@ -14,11 +14,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.joe.indoorlocalization.Algorithms.K_NearestAlgorithm;
+import com.joe.indoorlocalization.ApplicationState;
 import com.joe.indoorlocalization.Calibration.CalibrateActivity;
 import com.joe.indoorlocalization.FileChooser;
+import com.joe.indoorlocalization.IndoorLocalization;
 import com.joe.indoorlocalization.Models.ExportFile;
 import com.joe.indoorlocalization.Models.ImportFile;
 import com.joe.indoorlocalization.SideMenu;
@@ -54,6 +58,8 @@ public class LocateActivity extends AppCompatActivity {
     private K_NearestAlgorithm deterministicAlgorithm;
     private ImportFile importFile;
 
+    private ApplicationState state;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -71,6 +77,8 @@ public class LocateActivity extends AppCompatActivity {
                 PowerManager.SCREEN_DIM_WAKE_LOCK, "My wakelock");
         receiverWifi = new WifiReceiver();
         this.registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        this.state = ((IndoorLocalization)getApplicationContext()).getApplicationState();
+
         progressDialog= new ProgressDialog(this);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         progressDialog.setCancelable(true);
@@ -81,8 +89,22 @@ public class LocateActivity extends AppCompatActivity {
         importFile = new ImportFile(this, "locate");
         importFile.importFile("/sdcard/Android/data/com.joe.indoorlocalization/files/Documents/dataJoe.txt");
         mainWifi.startScan();
+        handleAutomaticFloorSwitch();
+    }
 
-        Log.i(TAG, "The app is running :)))");
+    private void handleAutomaticFloorSwitch() {
+        final TextView floorSwitch = (TextView)findViewById(R.id.locateAutoSwitch);
+        floorSwitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                state.toggleAutomaticallyChangeFloor();
+                if(state.getAutomaticallyChangeFloor()) {
+                    floorSwitch.setText("Switch floor automatically [ON]");
+                } else {
+                    floorSwitch.setText("Switch floor automatically [OFF]");
+                }
+            }
+        });
     }
 
     protected void onPause() {

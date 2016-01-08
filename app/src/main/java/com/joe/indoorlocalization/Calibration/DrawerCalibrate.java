@@ -38,14 +38,14 @@ public class DrawerCalibrate extends Drawer {
 
     private void drawScans(Canvas canvas, Context context, CustomImageView view) {
         for(FingerPrint fp: this.state.getFingerPrints()) {
-            Point screenPoint = view.convertImagePointToScreenPoint(new Point((int) fp.getX(), (int) fp.getY()));
+            if(this.state.getCurrentFloor() == fp.getZ()) {
+                Point screenPoint = view.convertImagePointToScreenPoint(new Point((int) fp.getX(), (int) fp.getY()));
+                Paint paint = new Paint();
+                paint.setAntiAlias(true);
+                paint.setColor(Color.RED);
 
-            Paint paint = new Paint();
-            paint.setAntiAlias(true);
-            paint.setColor(Color.RED);
-
-            canvas.drawCircle(screenPoint.x, screenPoint.y, 15, paint);
-
+                canvas.drawCircle(screenPoint.x, screenPoint.y, 15, paint);
+            }
         }
     }
 
@@ -112,12 +112,10 @@ public class DrawerCalibrate extends Drawer {
     }
 
     private void drawPointsAndLine(Canvas canvas, CustomImageView view, CalibrationState cState) {
-        drawPoint(canvas, view, cState.point1);
-        drawPoint(canvas, view, cState.point2);
-
         if(cState.pointsExist()) {
             drawLine(canvas, view, cState.point1, cState.point2);
         }
+        drawPoints(canvas, view);
     }
 
     //       ____________________
@@ -145,13 +143,29 @@ public class DrawerCalibrate extends Drawer {
         canvas.drawLine(startX, startY, stopX, stopY, paint);
     }
 
-    private void drawPoint(Canvas canvas, CustomImageView view, Point point) {
-        if(point != null) {
-            Point screenPoint = view.convertImagePointToScreenPoint(new Point(point.x, point.y));
-            Paint paint = new Paint();
-            paint.setAntiAlias(true);
-            paint.setColor(Color.RED);
-            canvas.drawCircle(screenPoint.x, screenPoint.y, 20, paint);
+    private void drawPoints(Canvas canvas, CustomImageView view) {
+        Paint paintCircle = new Paint();
+        paintCircle.setAntiAlias(true);
+        paintCircle.setColor(Color.RED);
+
+        Paint paintText = new Paint();
+        paintText.setAntiAlias(true);
+        paintText.setColor(Color.WHITE);
+        paintText.setTextSize(40);
+        paintText.setStrokeWidth(10);
+
+        int circleWidth = 30;
+        Point point1 = cState.point1;
+        Point point2 = cState.point2;
+        if(point1 != null) {
+            Point screenPoint = view.convertImagePointToScreenPoint(new Point(point1.x, point1.y));
+            canvas.drawCircle(screenPoint.x, screenPoint.y, circleWidth, paintCircle);
+            canvas.drawText("S", (screenPoint.x-(circleWidth/2)+3), (screenPoint.y+(circleWidth/2)), paintText);
+        }
+        if(point2 != null) {
+            Point screenPoint = view.convertImagePointToScreenPoint(new Point(point2.x, point2.y));
+            canvas.drawCircle(screenPoint.x, screenPoint.y, circleWidth, paintCircle);
+            canvas.drawText("E", (screenPoint.x-(circleWidth/2)+3), (screenPoint.y+(circleWidth/2)), paintText);
         }
     }
 

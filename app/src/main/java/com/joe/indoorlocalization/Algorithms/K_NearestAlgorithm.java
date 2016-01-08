@@ -112,20 +112,20 @@ public class K_NearestAlgorithm {
                 distances.put(distance, fp);
             }
             // Sorting distances array
-            Map<Integer, Scan> sortedDistances = new TreeMap<Integer, Scan>(distances);
-
-            int nodesLimit = 5;
+            Map<Integer, Scan> sortedDistances = new TreeMap<>(distances);
+            int nodesLimit = 10;
             int nodes = 0;
-            int zSum = 0;
+            double zSum = 0;
             float xSum = 0;
             float ySum = 0;
+            Log.d(TAG, "ASDDD: " );
             // For max nodesLimit get sum of z, x, y
-            for (Scan scan : sortedDistances.values()) {
+            for(Map.Entry<Integer,Scan> entry : sortedDistances.entrySet()) {
                 if(nodes >= nodesLimit) {
                     break;
                 }
-                //FingerPrint scan = FingerPrint.findById(FingerPrint.class, fp.getScanId());
-                FingerPrint fingerPrint = scan.getFingerPrint();
+                FingerPrint fingerPrint = entry.getValue().getFingerPrint();
+                Log.d(TAG, "Nearest Z: " + fingerPrint.getZ());
                 zSum += fingerPrint.getZ();
                 xSum += fingerPrint.getX();
                 ySum += fingerPrint.getY();
@@ -133,12 +133,15 @@ public class K_NearestAlgorithm {
             }
             if(nodes > 0) {
                 // Calc average of fingerPrints with mac currentMac
-                Log.d(TAG, "zSum: " + zSum + " nodes " + nodes);
+                //Log.d(TAG, "zSum: " + zSum + " nodes " + nodes);
+                if(zSum == 0) {
+                    zSum = 0.000000001;
+                }
                 float zAverage = (float)zSum/(float)nodes;
-                Log.d(TAG, "Resss: " + zAverage);
+                //Log.d(TAG, "Resss: " + zAverage);
                 float xAverage = Math.round(xSum / nodes);
                 float yAverage = Math.round(ySum / nodes);
-                Log.d(TAG, "zAverage: " + zAverage);
+                //Log.d(TAG, "zAverage: " + zAverage);
                 zSumAverage += zAverage;
                 xSumAverage += xAverage;
                 ySumAverage += yAverage;
@@ -146,7 +149,7 @@ public class K_NearestAlgorithm {
             }
         }
         if(averageSums > 0) {
-            Log.d(TAG, "averageSums: " + averageSums + " zSumAverage: " + zSumAverage);
+            //Log.d(TAG, "averageSums: " + averageSums + " zSumAverage: " + zSumAverage);
             float z = ((float)zSumAverage/(float)averageSums);
             int x = Math.round(xSumAverage/averageSums);
             int y = Math.round(ySumAverage/averageSums);
@@ -163,7 +166,7 @@ public class K_NearestAlgorithm {
         state.setZ(z);
         customImageView.invalidate();
 
-        // TODO; change floor if the "setting" is on
+
     }
 
 

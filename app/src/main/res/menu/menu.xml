@@ -7,11 +7,6 @@
         android:title="Locate"
         app:showAsAction="always" />
     <item
-        android:id="@+id/menu_lockPoint"
-        android:title="showScans"
-        app:showAsAction="always"
-        android:icon="@drawable/lock"/>
-    <item
         android:id="@+id/menu_showScans"
         android:title="showScans"
         app:showAsAction="always"

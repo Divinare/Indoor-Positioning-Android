@@ -27,17 +27,16 @@ import java.util.TreeMap;
 public class K_NearestAlgorithm {
 
     static String TAG = K_NearestAlgorithm.class.getSimpleName();
+    private AlgorithmMain algorithmMain;
     private ApplicationState state;
-    private CustomImageView customImageView;
 
-    public K_NearestAlgorithm(Context context) {
-        this.state = ((IndoorLocalization)context.getApplicationContext()).getApplicationState();
-        View rootView = ((Activity)context).getWindow().getDecorView().findViewById(android.R.id.content);
-        this.customImageView = (CustomImageView)rootView.findViewById(R.id.customImageViewLocate);
+    public K_NearestAlgorithm(AlgorithmMain algorithmMain, ApplicationState state) {
+        this.algorithmMain = algorithmMain;
+        this.state = state;
     }
 
     public void calcLocation(StringBuilder currentFingerPrintData) {
-        Log.d(TAG, "at calcLocation");
+        Log.d(TAG, "k_nearestAlgorithm calcLocation");
         String currentFP = currentFingerPrintData.toString();
 
         // Expected: 2;1773.0;1776.0
@@ -57,13 +56,13 @@ public class K_NearestAlgorithm {
 
         String[] currentFPArray = currentFP.split(";");
 
-        ArrayList<FingerPrint> fps = state.getFingerPrints();
+        ArrayList<FingerPrint> fps = this.state.getFingerPrints();
         Log.d(TAG, "NOW IN DATABASE FPS LENGTH: " + fps.size());
 
         for(int x = 0; x < fps.size(); x++) {
             FingerPrint f = fps.get(x);
-            Log.d(TAG, "z: " + f.getZ() + " x: " + f.getX() + " y: " + f.getY());
-            Log.d(TAG, "scans size: " + f.getScans().size());
+            //Log.d(TAG, "z: " + f.getZ() + " x: " + f.getX() + " y: " + f.getY());
+            //Log.d(TAG, "scans size: " + f.getScans().size());
             for(Scan scan : f.getScans()) {
                 //Log.d(TAG, "Mac: " + scan.getMac() + " RSSI: " + scan.getRSSI() + " network: " + scan.getNetwork());
             }
@@ -153,21 +152,12 @@ public class K_NearestAlgorithm {
             float z = ((float)zSumAverage/(float)averageSums);
             int x = Math.round(xSumAverage/averageSums);
             int y = Math.round(ySumAverage/averageSums);
-            handleResults(z, x, y);
-            Log.i(TAG, "RESULT: z: " + z + " x: " + x + " y: " + y);
+            String[] results = {"" + z, "" + x, "" + y};
+            algorithmMain.handleResults(results);
         } else {
-            Log.d(TAG, "Error at determistic algorithm, was not able to find familiar mac addresses");
+            String[] results = {"-1", "-1", "-1"};
+            algorithmMain.handleResults(results);
         }
     }
-
-    public void handleResults(float z, int x, int y) {
-        state.setX(x);
-        state.setY(y);
-        state.setZ(z);
-        customImageView.invalidate();
-
-
-    }
-
 
 }

@@ -8,7 +8,10 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.joe.indoorlocalization.ApplicationState;
@@ -16,6 +19,7 @@ import com.joe.indoorlocalization.CustomImageView;
 import com.joe.indoorlocalization.Drawer;
 import com.joe.indoorlocalization.IndoorLocalization;
 import com.joe.indoorlocalization.Models.FingerPrint;
+import com.joe.indoorlocalization.Models.Scan;
 import com.joe.indoorlocalization.R;
 
 import java.util.ArrayList;
@@ -28,15 +32,44 @@ public class DrawerCalibrate extends Drawer {
     static String TAG = DrawerCalibrate.class.getSimpleName();
     private ApplicationState state;
     private CalibrationState cState;
-    private Context context;
 
     public DrawerCalibrate(Context context) {
-        this.context = context;
         this.state = ((IndoorLocalization)context.getApplicationContext()).getApplicationState();
         this.cState = this.state.calibrationState;
     }
 
-    private void drawScans(Canvas canvas, Context context, CustomImageView view) {
+    private void drawCurrentFingerPrints(Canvas canvas, CustomImageView view) {
+        Log.d(TAG, "At you know : o");
+        for(Point point: cState.getCurrentScanLocations()) {
+            Point screenPoint = view.convertImagePointToScreenPoint(new Point(point.x, point.y));
+            Paint paint = new Paint();
+            paint.setAntiAlias(true);
+            paint.setColor(Color.RED);
+            canvas.drawCircle(screenPoint.x, screenPoint.y, 15, paint);
+        }
+    }
+
+    private void handleShowScans(Canvas canvas, Context context, CustomImageView view, Point screenPoint) {
+        drawScans(canvas, view);
+        removeStartScanElements(context);
+        possiblySelectScan(screenPoint, context, view, canvas);
+    }
+
+    private void removeStartScanElements(Context context) {
+        View rootView = ((Activity)context).getWindow().getDecorView().findViewById(android.R.id.content);
+        Button btnStartRecording = (Button) rootView.findViewById(R.id.btnStartRecording);
+        Button lockPointBtn = (Button) rootView.findViewById(R.id.lockPoint);
+
+        if(btnStartRecording != null) {
+            ((ViewGroup) btnStartRecording.getParent()).removeView(btnStartRecording);
+        }
+        if(lockPointBtn != null) {
+            ((ViewGroup) lockPointBtn.getParent()).removeView(lockPointBtn);
+        }
+    }
+
+    private void drawScans(Canvas canvas, CustomImageView view) {
+
         for(FingerPrint fp: this.state.getFingerPrints()) {
             if(this.state.getCurrentFloor() == fp.getZ()) {
                 Point screenPoint = view.convertImagePointToScreenPoint(new Point((int) fp.getX(), (int) fp.getY()));
@@ -46,6 +79,72 @@ public class DrawerCalibrate extends Drawer {
 
                 canvas.drawCircle(screenPoint.x, screenPoint.y, 15, paint);
             }
+        }
+    }
+
+    private void possiblySelectScan(Point screenPoint, Context context, CustomImageView view,  Canvas canvas) {
+        Point imagePoint = view.convertScreenPointToImagePoint(new Point(screenPoint.x, screenPoint.y));
+
+        int nearestZ = 0;
+        float nearestX = 0;
+        float nearestY = 0;
+        int nearestDistance = Integer.MAX_VALUE;
+
+        for(FingerPrint fp : this.state.getFingerPrints()) {
+
+           if(fp.getZ() == this.state.getCurrentFloor()) {
+               Point point1 = new Point((int)fp.getX(), (int)fp.getY());
+               Point point2 = new Point(imagePoint.x, imagePoint.y);
+               int currentDistance = calcDistanceBetweenTwoPoints(point1, point2);
+               if(currentDistance < nearestDistance) {
+                   nearestZ = fp.getZ();
+                   nearestX = fp.getX();
+                   nearestY = fp.getY();
+                   nearestDistance = currentDistance;
+               }
+           }
+        }
+        Log.d(TAG, "Nearest distance: " + nearestDistance);
+        if(nearestDistance < 150) {
+            Log.d(TAG, "making fp removable with z " + nearestZ + " x : " + nearestX + " y " + nearestY);
+            createRemoveScanButton(context, view, nearestX, nearestY, nearestZ);
+
+            Paint paint = new Paint();
+            paint.setAntiAlias(true);
+            paint.setColor(Color.CYAN);
+            Point screenPointForSelectedScan = view.convertImagePointToScreenPoint(new Point((int)nearestX, (int)nearestY));
+            canvas.drawCircle(screenPointForSelectedScan.x, screenPointForSelectedScan.y, 25, paint);
+        }
+
+    }
+    // REMOVE btn
+    private void createRemoveScanButton(Context context, final CustomImageView view, final float x, final float y, final int z) {
+        View rootView = ((Activity)context).getWindow().getDecorView().findViewById(android.R.id.content);
+        LinearLayout bottomBar = (LinearLayout) rootView.findViewById(R.id.calibrationBottomBar);
+
+        Button removeScan = (Button) rootView.findViewById(R.id.btnRemoveRecording);
+        boolean removeScanBtnExist = true;
+        if(removeScan == null) {
+            removeScan = new Button(context);
+            removeScan.setId(R.id.btnRemoveRecording);
+            removeScanBtnExist = false;
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
+            params.weight = 1.0f;
+            removeScan.setLayoutParams(params);
+        }
+        removeScan.setText("Remove scan (x: " + x + " y: " + y + ")");
+        removeScan.setBackgroundResource(R.drawable.buttonshape);
+        removeScan.setTextColor(Color.WHITE);
+        removeScan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                state.removeFingerPrint(z, x, y);
+                view.invalidate();
+            }
+        });
+        if(!removeScanBtnExist) {
+            bottomBar.addView(removeScan);
         }
     }
 
@@ -171,9 +270,11 @@ public class DrawerCalibrate extends Drawer {
 
     @Override
     public void draw(Canvas canvas, Context context, CustomImageView view, Point screenPoint) {
-        if(this.state.calibrationState.showingScans()) {
+        if(this.cState.getViewCurrentFingerPrints() && this.cState.getCurrentScanLocations().size() > 0) {
+            drawCurrentFingerPrints(canvas, view);
+        } else if (this.state.calibrationState.showingScans()) {
             Log.d(TAG, "at calibrate draw, return cuz showing scans");
-            drawScans(canvas, context, view);
+            handleShowScans(canvas, context, view, screenPoint);
         } else {
             lineCalibrate(canvas, context, view, screenPoint);
         }

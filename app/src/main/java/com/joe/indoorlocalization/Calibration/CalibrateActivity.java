@@ -4,12 +4,19 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Point;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -20,14 +27,17 @@ import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -37,6 +47,7 @@ import android.widget.Toast;
 
 import com.joe.indoorlocalization.ApplicationState;
 import com.joe.indoorlocalization.CustomImageView;
+import com.joe.indoorlocalization.Drawer;
 import com.joe.indoorlocalization.FileChooser;
 import com.joe.indoorlocalization.IndoorLocalization;
 import com.joe.indoorlocalization.Locate.LocateActivity;
@@ -62,7 +73,6 @@ public class CalibrateActivity extends AppCompatActivity {
     SideMenu sideMenu = new SideMenu(this);
     private CustomImageView customImageView;
 
-
     //WiFi tools
     private static PowerManager.WakeLock wakeLock;
     private WifiManager mainWifi;
@@ -73,17 +83,22 @@ public class CalibrateActivity extends AppCompatActivity {
     private int maxScans = 1;
     private boolean runningScan = false;
     private boolean scanHasStarted = false;
-    //private ProgressDialog progressDialog;
-    //private StringBuilder fingerPrintData; // mac;rssi;mac;rssi... format
     private StringBuilder networks;
-    private ArrayList<StringBuilder> fingerPrintData = new ArrayList<>();
     private long scanStartTime;
+    private long scanEndTime;
     private ProgressBar progressbar;
     private ProgressBarAnimation progressBarAnimation;
+    private ArrayList<StringBuilder> fingerPrintData = new ArrayList<>();
 
     private ApplicationState state;
     private CalibrationState cState;
     private ImportFile importFile;
+
+
+
+    //UI
+    private MenuItem menuShowScans;
+    private int bottomBarHeight = 60;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -153,11 +168,17 @@ public class CalibrateActivity extends AppCompatActivity {
         mainWifi.startScan();
         scanHasStarted = true;
         this.scanStartTime = SystemClock.elapsedRealtime();
+        cState.setAllowChangeFloor(false);
+
+        Drawable showScansIcon = this.getResources().getDrawable(R.drawable.show_scans_locked);
+        menuShowScans.setIcon(showScansIcon);
+        cState.setAllowShowScans(false);
     }
 
     private void stopScan() {
         this.runningScan = false;
         if(scanHasStarted) {
+            this.scanEndTime = SystemClock.elapsedRealtime();
             handleScanEnding();
         }
     }
@@ -167,7 +188,6 @@ public class CalibrateActivity extends AppCompatActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-            Log.d(TAG, "At animate run...");
             if(runningScan) {
                 anim.setDuration(1500);
                 progressBar.startAnimation(anim);
@@ -198,14 +218,27 @@ public class CalibrateActivity extends AppCompatActivity {
     // BOTTOM BAR BUTTONS
     // START
     private void createStartRecordingBtn() {
+        // INITIAL SETUP
         removeExistingButtons();
         state.calibrationState.setPointsSelectable(true);
+        cState.setAllowChangeFloor(true);
+        cState.setViewCurrentFingerPrints(false);
+        cState.resetCurrentScanLocations();
 
+        if(this.menuShowScans != null) {
+            Drawable showScansIcon = this.getResources().getDrawable(R.drawable.show_scans);
+            menuShowScans.setIcon(showScansIcon);
+            cState.setAllowShowScans(true);
+        }
         LinearLayout bottomBar = (LinearLayout) findViewById(R.id.calibrationBottomBar);
+
+        // START btn
         Button btnStartRecording = new Button(this);
         modifyButtonStyling(btnStartRecording);
         btnStartRecording.setId(R.id.btnStartRecording);
         btnStartRecording.setText("Start Recording");
+        btnStartRecording.setBackgroundResource(R.drawable.buttonshape);
+        btnStartRecording.setTextColor(Color.WHITE);
         btnStartRecording.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -222,7 +255,36 @@ public class CalibrateActivity extends AppCompatActivity {
             btnStartRecording.setEnabled(false);
         }
         bottomBar.addView(btnStartRecording);
+
+        // LOCK btn
+        /*
+        RelativeLayout relativeLayout = new RelativeLayout(this);
+        relativeLayout.setId(R.id.lockPointRelativeLayout);
+        LinearLayout.LayoutParams relativeLayoutParams = createLinearLayoutParams();
+        relativeLayoutParams.setMargins(30, 0, 30, 0);
+        relativeLayout.setLayoutParams(relativeLayoutParams);
+*/
+        Button lockPoint = new Button(this);
+        lockPoint.setText("Lock");
+        lockPoint.setId(R.id.lockPoint);
+        lockPoint.setTextColor(Color.WHITE);
+        modifyButtonStyling(lockPoint);
+        int sizeInPixels = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, bottomBarHeight-10, getResources().getDisplayMetrics());
+        lockPoint.setWidth(sizeInPixels);
+        lockPoint.setHeight(sizeInPixels);
+        //lockPoint.setPadding(((sizeInPixels / 4) + 10), 0, 0, 0); // An ugly hack, I know :(
+        //lockPoint.setCompoundDrawablesWithIntrinsicBounds(R.drawable.lock, 0, 0, 0);
+        lockPoint.setBackgroundResource(R.drawable.buttonshape);
+        lockPoint.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                state.calibrationState.lockSelectedPoint();
+            }
+        });
+        //relativeLayout.addView(lockPoint);
+        bottomBar.addView(lockPoint);
         state.calibrationState.setLockToDrawing(false);
+        customImageView.invalidate();
     }
 
     // STOP
@@ -230,15 +292,26 @@ public class CalibrateActivity extends AppCompatActivity {
         removeExistingButtons();
         LinearLayout bottomBar = (LinearLayout) findViewById(R.id.calibrationBottomBar);
 
+        // STOP RECORDING btn
+        final Button btnStopRecording = new Button(this);
+        modifyButtonStyling(btnStopRecording);
+        btnStopRecording.setId(R.id.btnStopRecording);
+        btnStopRecording.setText("Stop recording");
+        btnStopRecording.setBackgroundResource(R.drawable.buttonshape);
+        btnStopRecording.setTextColor(Color.WHITE);
+        btnStopRecording.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                stopScan();
+                btnStopRecording.setEnabled(false);
+            }
+        });
+        bottomBar.addView(btnStopRecording);
+
         // SCAN ANIMATION
         RelativeLayout relativeLayout = new RelativeLayout(this);
         relativeLayout.setId(R.id.progressbar_relativeLayout);
-        LinearLayout.LayoutParams relativeLayoutParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        // Make sizeInPixels, 60dp
-        float sizeInPixels = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 60, getResources().getDisplayMetrics());
-        relativeLayoutParams.width = (int)sizeInPixels;
-        relativeLayoutParams.height = (int)sizeInPixels;
+        LinearLayout.LayoutParams relativeLayoutParams = createLinearLayoutParams();
         relativeLayout.setBackgroundColor(000);
         relativeLayout.setPadding(10, 10, 10, 10);
         relativeLayout.setLayoutParams(relativeLayoutParams);
@@ -267,20 +340,6 @@ public class CalibrateActivity extends AppCompatActivity {
         scanCount.setTextColor(Color.parseColor("#FFFFFF"));
         scanCount.setPadding(20, 20, 20, 20);
         bottomBar.addView(scanCount);
-
-        // STOP RECORDING btn
-        final Button btnStopRecording = new Button(this);
-        modifyButtonStyling(btnStopRecording);
-        btnStopRecording.setId(R.id.btnStopRecording);
-        btnStopRecording.setText("Stop recording");
-        btnStopRecording.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                stopScan();
-                btnStopRecording.setEnabled(false);
-            }
-        });
-        bottomBar.addView(btnStopRecording);
     }
 
     // SAVE, DISMISS
@@ -292,6 +351,8 @@ public class CalibrateActivity extends AppCompatActivity {
         modifyButtonStyling(btnSaveRecording);
         btnSaveRecording.setId(R.id.btnSaveRecording);
         btnSaveRecording.setText("Save");
+        btnSaveRecording.setBackgroundResource(R.drawable.buttonshape);
+        btnSaveRecording.setTextColor(Color.WHITE);
         btnSaveRecording.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -305,6 +366,8 @@ public class CalibrateActivity extends AppCompatActivity {
         modifyButtonStyling(btnDismissRecording);
         btnDismissRecording.setId(R.id.btnDismissRecording);
         btnDismissRecording.setText("Dismiss");
+        btnDismissRecording.setBackgroundResource(R.drawable.buttonshape);
+        btnDismissRecording.setTextColor(Color.WHITE);
         btnDismissRecording.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -321,11 +384,15 @@ public class CalibrateActivity extends AppCompatActivity {
         Button stopRecordingBtn = (Button) bottomBar.findViewById(R.id.btnStopRecording);
         Button saveRecordingBtn = (Button) bottomBar.findViewById(R.id.btnSaveRecording);
         Button dismissRecordingBtn = (Button) bottomBar.findViewById(R.id.btnDismissRecording);
+        Button removeRecordingBtn = (Button) bottomBar.findViewById(R.id.btnRemoveRecording);
+        Button lockPointBtn = (Button) bottomBar.findViewById(R.id.lockPoint);
 
         removeElementIfNotNull(startRecordingBtn);
         removeElementIfNotNull(stopRecordingBtn);
         removeElementIfNotNull(saveRecordingBtn);
         removeElementIfNotNull(dismissRecordingBtn);
+        removeElementIfNotNull(removeRecordingBtn);
+        removeElementIfNotNull(lockPointBtn);
     }
     private void removeElementIfNotNull(View element) {
         if(element != null) {
@@ -333,11 +400,24 @@ public class CalibrateActivity extends AppCompatActivity {
         }
     }
 
+    // HELPER METHODS
+
     private void modifyButtonStyling(Button btn) {
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
         params.weight = 1.0f;
+        params.setMargins(5, 5, 5, 5);
         btn.setLayoutParams(params);
+    }
+
+    // creates  bottomBarHeight x bottomBarHeight relativeLayout
+    private LinearLayout.LayoutParams createLinearLayoutParams() {
+        LinearLayout.LayoutParams linearLayoutParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        float sizeInPixels = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, bottomBarHeight, getResources().getDisplayMetrics());
+        linearLayoutParams.width = (int)sizeInPixels;
+        linearLayoutParams.height = (int)sizeInPixels;
+        return linearLayoutParams;
     }
 
     private void handleScanEnding() {
@@ -357,11 +437,13 @@ public class CalibrateActivity extends AppCompatActivity {
         }
     }
 
+    // DIALOG AFTER SCAN
     private void showAfterScanDialog() {
         final Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.after_scan_dialog);
         dialog.setTitle("Scan ended");
-
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        // SAVE
         Button buttonSave = (Button) dialog.findViewById(R.id.afterScanDialogSave);
         buttonSave.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -371,6 +453,7 @@ public class CalibrateActivity extends AppCompatActivity {
             }
         });
 
+        // VIEW
         Button buttonView = (Button) dialog.findViewById(R.id.afterScanDialogView);
         buttonView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -378,10 +461,15 @@ public class CalibrateActivity extends AppCompatActivity {
                 dialog.dismiss();
                 if (fingerPrintData.size() == 0) {
                     Toast.makeText(CalibrateActivity.this, "Nothing to show. You need to scan for at least 3 seconds.", Toast.LENGTH_LONG).show();
+                } else {
+                    saveCurrentScanLocationsIntoCalibrationState();
+                    cState.setViewCurrentFingerPrints(true);
+                    customImageView.invalidate();
                 }
             }
         });
 
+        // DISMISS
         Button buttonDismiss = (Button) dialog.findViewById(R.id.afterScanDialogDismiss);
         buttonDismiss.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -421,13 +509,38 @@ public class CalibrateActivity extends AppCompatActivity {
     }
     */
 
+    private void saveCurrentScanLocationsIntoCalibrationState() {
+        long scanTime = (scanEndTime - scanStartTime);
+        Point p1 = cState.point1;
+        Point p2 = cState.point2;
+        for(StringBuilder fpCurrent : fingerPrintData) {
+            String[] fpArray = fpCurrent.toString().split(";");
+            long timestamp = Long.parseLong(fpArray[0]);
+            double ratio = (double)timestamp/(double)scanTime;
+            float x;
+            float y;
+            if(p1.x < p2.x ) {
+                x = (int)((p2.x - p1.x)*ratio);
+                x += p1.x;
+            } else {
+                float result = (int)((p1.x - p2.x)*ratio);
+                x = p1.x - result;
+            }
+            if(p1.y < p2.y ) {
+                y = (int)((p2.y - p1.y)*ratio);
+                y += p1.y;
+            } else {
+                float result = (int)((p1.y - p2.y)*ratio);
+                y = p1.y - result;
+            }
+            cState.addToCurrentScanLocations(new Point((int) x, (int) y));
+        }
+    }
+
     private void saveFingerPrintDataIntoApplicationState() {
         CalibrationState cState = this.state.calibrationState;
 
-        Log.d(TAG, "Number of scans: " + fingerPrintData.size());
-        Log.d(TAG, "Point1: " + cState.point1.x + " " + cState.point1.y + " Point2: " + cState.point2.x + " " + cState.point2.y);
-
-        long scanTime = (SystemClock.elapsedRealtime() - scanStartTime);
+        long scanTime = (scanEndTime - scanStartTime);
 
         Point p1 = cState.point1;
         Point p2 = cState.point2;
@@ -461,31 +574,31 @@ public class CalibrateActivity extends AppCompatActivity {
                 fp.addScan(scan);
             }
             this.state.addFingerPrint(fp);
-            Log.d(TAG, "Added fp, z: " + fp.getZ() + " x: " + fp.getX() + " y: " + fp.getY());
         }
-        Toast.makeText(CalibrateActivity.this, this.fingerPrintData.size() + " fingerprints saved to memory.", Toast.LENGTH_LONG).show();
-        this.fingerPrintData = new ArrayList<>();
+        Toast.makeText(CalibrateActivity.this, fingerPrintData.size() + " fingerprints saved to memory.", Toast.LENGTH_LONG).show();
+        fingerPrintData = new ArrayList<>();
     }
 
     // OPTIONS MENU
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu, menu);
-        return true;
+        this.menuShowScans = menu.findItem(R.id.menu_showScans);
+        menuShowScans.setVisible(true);
+        Drawable showScansIcon = this.getResources().getDrawable(R.drawable.show_scans);
+        menuShowScans.setIcon(showScansIcon);
+        cState.setAllowShowScans(true);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem menuViewSwitch = menu.findItem(R.id.menu_viewSwitch);
         menuViewSwitch.setTitle("Locate");
-
-        MenuItem menuShowScans = menu.findItem(R.id.menu_showScans);
-        menuShowScans.setVisible(true);
-        MenuItem menuLockPoint = menu.findItem(R.id.menu_lockPoint);
-        menuLockPoint.setVisible(true);
         return super.onPrepareOptionsMenu(menu);
     }
+
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -497,6 +610,7 @@ public class CalibrateActivity extends AppCompatActivity {
         ExportFile exportFile = new ExportFile(this);
         int id = item.getItemId();
         if (id == R.id.menu_viewSwitch) {
+            this.cState.setAllowChangeFloor(true);
             this.startActivity(intentLocate);
         } else if(id == R.id.menu_import_database) {
             this.startActivityForResult(intentImportDatabase, 1);
@@ -506,10 +620,12 @@ public class CalibrateActivity extends AppCompatActivity {
         } else if(id == R.id.menu_help) {
             return true;
         } else if(id == R.id.menu_showScans) {
-            this.state.calibrationState.toggleShowingScans();
+            this.cState.toggleShowingScans();
+            if(!this.cState.showingScans()) {
+                createStartRecordingBtn();
+            }
+            Toast.makeText(this, "Not allowed to show scans at this point", Toast.LENGTH_LONG);
             customImageView.invalidate();
-        } else if(id == R.id.menu_lockPoint) {
-            state.calibrationState.lockSelectedPoint();
         }
 
         return super.onOptionsItemSelected(item);

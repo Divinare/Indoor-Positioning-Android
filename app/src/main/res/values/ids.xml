@@ -5,9 +5,11 @@
     <item type="id" name="btnStopRecording" />
     <item type="id" name="btnSaveRecording" />
     <item type="id" name="btnDismissRecording" />
+    <item type="id" name="btnRemoveRecording" />
     <item type="id" name="progressbar_relativeLayout" />
     <item type="id" name="scanCount" />
-
+    <item type="id" name="lockPoint" />
+    <item type="id" name="lockPointRelativeLayout" />
 
 
 </resources>

@@ -18,6 +18,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.joe.indoorlocalization.Algorithms.AlgorithmMain;
 import com.joe.indoorlocalization.Algorithms.K_NearestAlgorithm;
 import com.joe.indoorlocalization.ApplicationState;
 import com.joe.indoorlocalization.Calibration.CalibrateActivity;
@@ -47,7 +48,6 @@ public class LocateActivity extends AppCompatActivity {
     private List<ScanResult> wifiList;
 
     private int maxScans = 1;
-    private ProgressDialog progressDialog;
     private StringBuilder fingerPrintData; // mac;rssi;mac;rssi... format
     private StringBuilder networks;
 
@@ -55,7 +55,7 @@ public class LocateActivity extends AppCompatActivity {
     public float y;
 
     SideMenu sideMenu = new SideMenu(this);
-    private K_NearestAlgorithm deterministicAlgorithm;
+    private AlgorithmMain algorithmMain;
     private ImportFile importFile;
 
     private ApplicationState state;
@@ -79,13 +79,7 @@ public class LocateActivity extends AppCompatActivity {
         this.registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
         this.state = ((IndoorLocalization)getApplicationContext()).getApplicationState();
 
-        progressDialog= new ProgressDialog(this);
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        progressDialog.setCancelable(true);
-        progressDialog.setTitle("RECORDING");
-        progressDialog.setMax(maxScans);
-
-        deterministicAlgorithm = new K_NearestAlgorithm(this);
+        algorithmMain = new AlgorithmMain(this);
         importFile = new ImportFile(this, "locate");
         importFile.importFile("/sdcard/Android/data/com.joe.indoorlocalization/files/Documents/dataJoe.txt");
         mainWifi.startScan();
@@ -129,7 +123,6 @@ public class LocateActivity extends AppCompatActivity {
             fingerPrintData = new StringBuilder();
             networks = new StringBuilder();
 
-            if (progressDialog.getProgress()<=progressDialog.getMax()) {
                 wifiList = mainWifi.getScanResults();
 
                 for(int j=0; j<wifiList.size(); j++) {
@@ -143,72 +136,27 @@ public class LocateActivity extends AppCompatActivity {
                         }
                     }
                 }
-                deterministicAlgorithm.calcLocation(fingerPrintData);
-                progressDialog.incrementProgressBy(1);
+                algorithmMain.calcLocation(fingerPrintData);
 
                 mainWifi.startScan();
                 Log.d("FINGER","FingerPrint initiated");
-            } else {
+           /* } else {
                 try {
                     unregisterReceiver(receiverWifi);
                 } catch(Exception e) {
                     Log.e(TAG, "couldn't unregister receiver");
                 }
             }
+            */
         }
-    }
-
-
-
-
-    public static String[] Load(File file)
-    {
-        FileInputStream fis = null;
-        try
-        {
-            fis = new FileInputStream(file);
-        }
-        catch (FileNotFoundException e) {e.printStackTrace();}
-        InputStreamReader isr = new InputStreamReader(fis);
-        BufferedReader br = new BufferedReader(isr);
-
-        String test;
-        int anzahl=0;
-        try
-        {
-            while ((test=br.readLine()) != null)
-            {
-                anzahl++;
-            }
-        }
-        catch (IOException e) {e.printStackTrace();}
-
-        try
-        {
-            fis.getChannel().position(0);
-        }
-        catch (IOException e) {e.printStackTrace();}
-
-        String[] array = new String[anzahl];
-
-        String line;
-        int i = 0;
-        try
-        {
-            while((line=br.readLine())!=null)
-            {
-                array[i] = line;
-                i++;
-            }
-        }
-        catch (IOException e) {e.printStackTrace();}
-        return array;
     }
 
     // OPTIONS
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+        Log.d(TAG, "SETUP2 SETU2P SETUP2");
+
         getMenuInflater().inflate(R.menu.menu, menu);
         return true;
     }
@@ -220,8 +168,6 @@ public class LocateActivity extends AppCompatActivity {
 
         MenuItem menuShowScans = menu.findItem(R.id.menu_showScans);
         menuShowScans.setVisible(false);
-        MenuItem menuLockPoint = menu.findItem(R.id.menu_lockPoint);
-        menuLockPoint.setVisible(false);
         return super.onPrepareOptionsMenu(menu);
     }
 

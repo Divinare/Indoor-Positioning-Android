@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -28,6 +29,11 @@ public class DrawerLocate extends Drawer {
     @Override
     public void draw(Canvas canvas, Context context, CustomImageView view, Point point) {
         ApplicationState state = ((IndoorLocalization)context.getApplicationContext()).getApplicationState();
+
+        if(state.getCurrentFloor() != (int)state.getZ()) {
+            Log.d(TAG, "Not drawing because floors were different");
+            return;
+        }
         Paint paint = new Paint();
         paint.setAntiAlias(true);
         paint.setColor(Color.BLUE);
@@ -35,11 +41,9 @@ public class DrawerLocate extends Drawer {
         Point imagePoint = new Point(state.getX(), state.getY());
         Point screenPoint = view.convertImagePointToScreenPoint(imagePoint);
 
+        Log.d(TAG, "DRAWINGGGGGGGGGGGGGG");
+        Log.d(TAG, "curr floor: " + state.getCurrentFloor() + " z: " + (int)state.getZ());
         canvas.drawCircle(screenPoint.x, screenPoint.y, 20, paint);
-
-        View rootView = ((Activity)context).getWindow().getDecorView().findViewById(android.R.id.content);
-        TextView locationCoordinates = (TextView) rootView.findViewById(R.id.locationCoordinates);
-        locationCoordinates.setText("x: " + state.getX() + " y: " + state.getY() + " z: " + state.getZ());
 
     }
 }

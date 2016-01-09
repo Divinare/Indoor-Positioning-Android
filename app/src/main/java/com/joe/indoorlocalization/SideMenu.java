@@ -37,8 +37,6 @@ public class SideMenu extends AppCompatActivity {
     private DrawerLayout mDrawerLayout;
 
     private ApplicationState state;
-    private TreeMap<Integer, String> blueprints = new TreeMap<>();
-
     public SideMenu(Activity activity) {
         this.activity = activity;
     }
@@ -49,15 +47,14 @@ public class SideMenu extends AppCompatActivity {
         mDrawerList = (ListView) activity.findViewById(R.id.navList);
         mDrawerLayout = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
         Log.d(TAG, mDrawerLayout.toString());
-        dynamicallyAddBlueprints();
         addSideMenuItems();
         setupSideMenu();
     }
 
     private void addSideMenuItems() {
-        String[] sideMenuListNames = new String[blueprints.size()];
+        String[] sideMenuListNames = new String[this.state.getBlueprints().size()];
         int index = 0;
-        for (HashMap.Entry<Integer, String> entry : blueprints.entrySet()) {
+        for (HashMap.Entry<Integer, String> entry : this.state.getBlueprints().entrySet()) {
             if(entry.getKey() == 0) {
                 sideMenuListNames[index] = "Basement";
             } else {
@@ -65,7 +62,6 @@ public class SideMenu extends AppCompatActivity {
             }
             index++;
         }
-
         mAdapter = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, sideMenuListNames);
         mDrawerList.setAdapter(mAdapter);
         mDrawerList.setOnItemClickListener(new sideMenuItemClickListener());
@@ -80,45 +76,10 @@ public class SideMenu extends AppCompatActivity {
 
     /** Swaps fragments in the main content view */
     private void selectItem(int position) {
-        Log.i(TAG, "position " + position + " clicked");
-        int floorNumber = Integer.parseInt(blueprints.keySet().toArray()[position].toString());
-        this.state.setZ(floorNumber);
-        this.state.setCurrentFloor(floorNumber);
-        setFloorText(floorNumber);
-        changeFloor(floorNumber);
+        int floorNumber = Integer.parseInt(this.state.getBlueprints().keySet().toArray()[position].toString());
+        this.state.floorChanger.changeFloor(activity, floorNumber, className);
         mDrawerList.setItemChecked(position, true);
         mDrawerLayout.closeDrawer(mDrawerList);
-    }
-
-    private void setFloorText(int floorNumber) {
-        TextView floorTextView;
-        if(className.equals("locate")) {
-            floorTextView = (TextView)activity.findViewById(R.id.floorLocate);
-        } else {
-            floorTextView = (TextView)activity.findViewById(R.id.floorCalibration);
-        }
-
-        if(floorNumber == 0) {
-            floorTextView.setText("Floor: basement");
-        } else {
-            floorTextView.setText("Floor " + floorNumber);
-        }
-    }
-
-    private void changeFloor(int floor) {
-        if(className.equals("locate")) {
-            CustomImageViewLocate imageView = (CustomImageViewLocate) activity.findViewById(R.id.customImageViewLocate);
-            imageView.setImageBitmap(getBitmap(floor));
-        } else {
-            CustomImageViewCalibrate imageView = (CustomImageViewCalibrate) activity.findViewById(R.id.customImageViewCalibrate);
-            imageView.setImageBitmap(getBitmap(floor));
-        }
-
-    }
-
-    private Bitmap getBitmap(int floor) {
-        String path = blueprints.get(floor);
-        return BitmapFactory.decodeFile(path);
     }
 
     private void setupSideMenu() {
@@ -143,25 +104,4 @@ public class SideMenu extends AppCompatActivity {
         mDrawerToggle.setDrawerIndicatorEnabled(true);
         mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
-
-    private void dynamicallyAddBlueprints() {
-        File blueprintsDir = new File("/sdcard/Android/data/com.joe.indoorlocalization/files/Documents/blueprints/");
-        if(!blueprintsDir.exists()) {
-            blueprintsDir.mkdirs();
-        }
-        File[] blueprintFiles = blueprintsDir.listFiles();
-        for(File blueprint : blueprintFiles) {
-            Log.d(TAG, blueprint.getAbsolutePath());
-            String path = blueprint.getAbsolutePath();
-            int floorNumber = getFloorNumberFromFileName(blueprint.getName());
-            blueprints.put(floorNumber, path);
-        }
-    }
-
-    private int getFloorNumberFromFileName(String fileName) {
-        String[] tokens  = fileName.split("\\.(?=[^\\.]+$)");
-        char lastChar = tokens[0].charAt(tokens[0].length() - 1); // tokens[0] is the fileName without extension (like .png)
-        return Integer.parseInt("" + lastChar);
-    }
-
 }

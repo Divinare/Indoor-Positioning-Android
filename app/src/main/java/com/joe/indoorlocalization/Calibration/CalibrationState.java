@@ -2,6 +2,9 @@ package com.joe.indoorlocalization.Calibration;
 
 import android.graphics.Point;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
 /**
  * Created by joe on 06/01/16.
  */
@@ -12,11 +15,15 @@ public class CalibrationState {
     private String selectedPoint = "point1";
     public Point point1 = null;
     public boolean point1Locked = false;
-
     public Point point2 = null;
     public boolean point2Locked = false;
-
     private boolean pointsSelectable = true;
+    private boolean allowChangeFloor = true;
+    private boolean allowShowScans = true;
+
+    private ArrayList<Point> currentScanLocations = new ArrayList<>();
+
+    private boolean viewCurrentFingerPrints = false;
 
     // Means that you can't select or reposition any points
     private boolean lockToDrawing = false;
@@ -39,7 +46,9 @@ public class CalibrationState {
     }
 
     public void toggleShowingScans() {
-        this.showingScans = !this.showingScans;
+        if(allowShowScans) {
+            this.showingScans = !this.showingScans;
+        }
     }
     public boolean showingScans() {
         return this.showingScans;
@@ -83,4 +92,35 @@ public class CalibrationState {
     public boolean getLockToDrawing() {
         return this.lockToDrawing;
     }
+
+    public void setViewCurrentFingerPrints(boolean val) {
+        this.viewCurrentFingerPrints = val;
+    }
+    public boolean getViewCurrentFingerPrints() {
+        return this.viewCurrentFingerPrints;
+    }
+
+    public void resetCurrentScanLocations() {
+        this.currentScanLocations = new ArrayList<>();
+    }
+    public void addToCurrentScanLocations(Point point) {
+        this.currentScanLocations.add(point);
+    }
+    public ArrayList<Point> getCurrentScanLocations() {
+        return this.currentScanLocations;
+    }
+
+    public boolean getAllowChangeFloor() {
+        return this.allowChangeFloor;
+    }
+     public void setAllowChangeFloor(boolean allow) {
+         this.allowChangeFloor = allow;
+     }
+    public boolean getAllowShowScans() {
+        return this.allowShowScans;
+    }
+    public void setAllowShowScans(boolean value) {
+        this.allowShowScans = value;
+    }
+    
 }

@@ -1,26 +1,38 @@
 package com.joe.indoorlocalization;
 
 import android.app.Application;
+import android.util.Log;
 
 import com.joe.indoorlocalization.Calibration.CalibrationState;
 import com.joe.indoorlocalization.Models.FingerPrint;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.TreeMap;
 
 /**
  * Created by joe on 31/12/15.
  */
 public class ApplicationState extends Application {
 
-    public CalibrationState calibrationState = new CalibrationState();
+    static String TAG = ApplicationState.class.getSimpleName();
+    public CalibrationState calibrationState;
+    public FloorChanger floorChanger;
 
     private int x;
     private int y;
     private double z = 1.0;
     private int currentFloor = 1;
     private boolean automaticallyChangeFloor = true;
-
     private ArrayList<FingerPrint> fingerPrints = new ArrayList();
+
+    private TreeMap<Integer, String> blueprints = new TreeMap<>();
+
+    public ApplicationState() {
+        calibrationState = new CalibrationState();
+        floorChanger = new FloorChanger(this);
+    }
+
 
     public void emptyCurrentDatabase() {
         this.fingerPrints = new ArrayList<>();
@@ -32,6 +44,16 @@ public class ApplicationState extends Application {
 
     public ArrayList<FingerPrint> getFingerPrints() {
         return this.fingerPrints;
+    }
+
+    public void removeFingerPrint(int z, float x, float y) {
+        for(FingerPrint fp : this.fingerPrints) {
+            if(fp.getZ() == z && fp.getX() == x && fp.getY() == y) {
+                this.fingerPrints.remove(fp);
+                Log.d(TAG, "Removing fingerPrint with z: " + z + " x: " + x + " y: " + y);
+                break;
+            }
+        }
     }
 
     public int getX() {
@@ -64,5 +86,13 @@ public class ApplicationState extends Application {
     }
     public void toggleAutomaticallyChangeFloor() {
         this.automaticallyChangeFloor = !this.automaticallyChangeFloor;
+    }
+
+    public TreeMap<Integer, String> getBlueprints() {
+        return this.blueprints;
+    }
+
+    public void addToBlueprints(int floorNumber, String path) {
+        this.blueprints.put(floorNumber, path);
     }
 }

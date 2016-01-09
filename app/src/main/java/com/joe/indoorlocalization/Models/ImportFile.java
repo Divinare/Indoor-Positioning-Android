@@ -84,11 +84,7 @@ public class ImportFile {
     private void importIntoDatabase(StringBuilder fileContent, String fileName) {
         Log.d(TAG, "Importing into database " + fileName);
         String[] rows = fileContent.toString().split("_");
-        int index = 0;
-        Log.d(TAG, "ROWS :LENGTH: " + rows.length);
         for(int i = 0; i < rows.length; i++) {
-            Log.d(TAG, "index : " + index);
-            index++;
             String row = rows[i];
             String[] array = row.split(";"); // Each row is now in a row array
             int z = Integer.parseInt(array[0]);
@@ -103,7 +99,6 @@ public class ImportFile {
                 String mac = array[j]; // list goes mac;rssi;mac;rssi...
                 String RSSI = array[j+1];
                 Scan scan = new Scan(fingerPrint, mac, RSSI);
-                //fp.save();
                 scans.add(scan);
             }
             fingerPrint.setScans(scans);

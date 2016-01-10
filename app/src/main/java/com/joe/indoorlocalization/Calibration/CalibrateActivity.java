@@ -220,7 +220,7 @@ public class CalibrateActivity extends AppCompatActivity {
     private void createStartRecordingBtn() {
         // INITIAL SETUP
         removeExistingButtons();
-        state.calibrationState.setPointsSelectable(true);
+        cState.setPointsSelectable(true);
         cState.setAllowChangeFloor(true);
         cState.setViewCurrentFingerPrints(false);
         cState.resetCurrentScanLocations();
@@ -243,13 +243,14 @@ public class CalibrateActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startScan();
-                state.calibrationState.setPointsSelectable(false);
-                state.calibrationState.setLockToDrawing(true);
+                cState.setPointsSelectable(false);
+                cState.setLockToDrawing(true);
+                cState.setAllowShowScans(false);
                 createStopRecordingBtn();
             }
         });
 
-        if(this.state.calibrationState.pointsExist()) {
+        if(this.cState.pointsExist()) {
             btnStartRecording.setEnabled(true);
         } else {
             btnStartRecording.setEnabled(false);
@@ -257,13 +258,6 @@ public class CalibrateActivity extends AppCompatActivity {
         bottomBar.addView(btnStartRecording);
 
         // LOCK btn
-        /*
-        RelativeLayout relativeLayout = new RelativeLayout(this);
-        relativeLayout.setId(R.id.lockPointRelativeLayout);
-        LinearLayout.LayoutParams relativeLayoutParams = createLinearLayoutParams();
-        relativeLayoutParams.setMargins(30, 0, 30, 0);
-        relativeLayout.setLayoutParams(relativeLayoutParams);
-*/
         Button lockPoint = new Button(this);
         lockPoint.setText("Lock");
         lockPoint.setId(R.id.lockPoint);
@@ -278,12 +272,11 @@ public class CalibrateActivity extends AppCompatActivity {
         lockPoint.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                state.calibrationState.lockSelectedPoint();
+                cState.lockSelectedPoint();
             }
         });
-        //relativeLayout.addView(lockPoint);
         bottomBar.addView(lockPoint);
-        state.calibrationState.setLockToDrawing(false);
+        cState.setLockToDrawing(false);
         customImageView.invalidate();
     }
 
@@ -462,9 +455,7 @@ public class CalibrateActivity extends AppCompatActivity {
                 if (fingerPrintData.size() == 0) {
                     Toast.makeText(CalibrateActivity.this, "Nothing to show. You need to scan for at least 3 seconds.", Toast.LENGTH_LONG).show();
                 } else {
-                    saveCurrentScanLocationsIntoCalibrationState();
-                    cState.setViewCurrentFingerPrints(true);
-                    customImageView.invalidate();
+                    // Do nothing, dialog's setOnDissmissListener will do the job.
                 }
             }
         });
@@ -482,8 +473,11 @@ public class CalibrateActivity extends AppCompatActivity {
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface arg0) {
-                Log.d(TAG, "At dismiss, " + fingerPrintData.size());
+                Log.d(TAG, "AT DISMISSSSSSSSSSSS, " + fingerPrintData.size());
                 if (fingerPrintData.size() > 0) {
+                    saveCurrentScanLocationsIntoCalibrationState();
+                    cState.setViewCurrentFingerPrints(true);
+                    customImageView.invalidate();
                     createSaveAndDismissBtn();
                 } else {
                     createStartRecordingBtn();
@@ -538,7 +532,7 @@ public class CalibrateActivity extends AppCompatActivity {
     }
 
     private void saveFingerPrintDataIntoApplicationState() {
-        CalibrationState cState = this.state.calibrationState;
+        CalibrationState cState = this.cState;
 
         long scanTime = (scanEndTime - scanStartTime);
 
@@ -585,9 +579,9 @@ public class CalibrateActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu, menu);
         this.menuShowScans = menu.findItem(R.id.menu_showScans);
         menuShowScans.setVisible(true);
-        Drawable showScansIcon = this.getResources().getDrawable(R.drawable.show_scans);
-        menuShowScans.setIcon(showScansIcon);
-        cState.setAllowShowScans(true);
+     //   Drawable showScansIcon = this.getResources().getDrawable(R.drawable.show_scans);
+     //   menuShowScans.setIcon(showScansIcon);
+     //   cState.setAllowShowScans(true);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -620,12 +614,16 @@ public class CalibrateActivity extends AppCompatActivity {
         } else if(id == R.id.menu_help) {
             return true;
         } else if(id == R.id.menu_showScans) {
-            this.cState.toggleShowingScans();
-            if(!this.cState.showingScans()) {
-                createStartRecordingBtn();
+            Log.d(TAG, "at Menu action, getAllowShowScans: " + cState.getAllowShowScans());
+            if(this.cState.getAllowShowScans()) {
+                this.cState.toggleShowingScans();
+                if (!this.cState.showingScans()) {
+                    createStartRecordingBtn();
+                }
+                customImageView.invalidate();
+            } else {
+                Toast.makeText(this, "Not allowed to show scans at this point", Toast.LENGTH_LONG);
             }
-            Toast.makeText(this, "Not allowed to show scans at this point", Toast.LENGTH_LONG);
-            customImageView.invalidate();
         }
 
         return super.onOptionsItemSelected(item);

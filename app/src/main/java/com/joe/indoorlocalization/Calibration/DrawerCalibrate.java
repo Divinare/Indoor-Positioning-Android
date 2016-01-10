@@ -272,7 +272,7 @@ public class DrawerCalibrate extends Drawer {
     public void draw(Canvas canvas, Context context, CustomImageView view, Point screenPoint) {
         if(this.cState.getViewCurrentFingerPrints() && this.cState.getCurrentScanLocations().size() > 0) {
             drawCurrentFingerPrints(canvas, view);
-        } else if (this.state.calibrationState.showingScans()) {
+        } else if (this.cState.showingScans()) {
             Log.d(TAG, "at calibrate draw, return cuz showing scans");
             handleShowScans(canvas, context, view, screenPoint);
         } else {

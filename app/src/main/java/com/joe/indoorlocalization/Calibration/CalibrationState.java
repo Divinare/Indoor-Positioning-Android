@@ -1,6 +1,7 @@
 package com.joe.indoorlocalization.Calibration;
 
 import android.graphics.Point;
+import android.util.Log;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -9,6 +10,8 @@ import java.util.ArrayList;
  * Created by joe on 06/01/16.
  */
 public class CalibrationState {
+
+    static String TAG = CalibrationState.class.getSimpleName();
 
     private boolean showingScans = false;
 
@@ -46,7 +49,8 @@ public class CalibrationState {
     }
 
     public void toggleShowingScans() {
-        if(allowShowScans) {
+        Log.d(TAG, "At toggle, allow? " + allowShowScans);
+        if(this.allowShowScans) {
             this.showingScans = !this.showingScans;
         }
     }

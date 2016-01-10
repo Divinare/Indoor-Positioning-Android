@@ -2,8 +2,6 @@ package com.joe.indoorlocalization;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -12,14 +10,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
-import com.joe.indoorlocalization.Calibration.CustomImageViewCalibrate;
-import com.joe.indoorlocalization.Locate.CustomImageViewLocate;
-
-import java.io.File;
 import java.util.HashMap;
-import java.util.TreeMap;
 
 /**
  * Created by joe on 20/12/15.
@@ -46,7 +38,6 @@ public class SideMenu extends AppCompatActivity {
         this.state = ((IndoorLocalization)context.getApplicationContext()).getApplicationState();
         mDrawerList = (ListView) activity.findViewById(R.id.navList);
         mDrawerLayout = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
-        Log.d(TAG, mDrawerLayout.toString());
         addSideMenuItems();
         setupSideMenu();
     }
@@ -100,7 +91,6 @@ public class SideMenu extends AppCompatActivity {
                 activity.invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
         };
-        Log.d(TAG, mDrawerToggle.toString());
         mDrawerToggle.setDrawerIndicatorEnabled(true);
         mDrawerLayout.setDrawerListener(mDrawerToggle);
     }

@@ -1,17 +1,14 @@
 package com.joe.indoorlocalization.Models;
 
 import android.content.Context;
-import android.graphics.Point;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.joe.indoorlocalization.ApplicationState;
-import com.joe.indoorlocalization.Calibration.CalibrateActivity;
 import com.joe.indoorlocalization.IndoorLocalization;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 
@@ -32,7 +29,6 @@ public class ExportFile {
     }
 
     public void exportApplicationStateIntoFile() {
-        Log.d(TAG, "Trying to save file...");
         if(this.state.getFingerPrints().size() == 0) {
             Toast.makeText(context, "Nothing to export", Toast.LENGTH_SHORT).show();
             return;
@@ -59,8 +55,7 @@ public class ExportFile {
             Log.i(TAG, "File " + fileName + " saved");
             Toast.makeText(context, "Exported to file " + fileName + " succesfully.", Toast.LENGTH_LONG).show();
         } catch (Exception e) {
-            Log.d(TAG, "Error on saving file");
-            Log.d(TAG, "Exception on data export");
+            Log.d(TAG, "Error on saving file, exception on data export");
             Log.d(TAG, e.getMessage());
         }
     }

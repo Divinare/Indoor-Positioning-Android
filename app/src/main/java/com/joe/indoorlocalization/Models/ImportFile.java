@@ -32,7 +32,6 @@ public class ImportFile {
         this.context = context;
         this.previousClassName = previousClassName;
         this.state = ((IndoorLocalization)context.getApplicationContext()).getApplicationState();
-
     }
 
     public void importFile(String path) {
@@ -92,7 +91,6 @@ public class ImportFile {
             float y = Float.parseFloat(array[2]);
 
             FingerPrint fingerPrint = new FingerPrint(z, x, y);
-            //scan.save();
             ArrayList<Scan> scans = new ArrayList<>();
 
             for(int j = 3; j < array.length-1; j=j+2) {

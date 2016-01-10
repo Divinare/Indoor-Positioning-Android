@@ -3,7 +3,6 @@ package com.joe.indoorlocalization.Calibration;
 import android.graphics.Point;
 import android.util.Log;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -49,7 +48,6 @@ public class CalibrationState {
     }
 
     public void toggleShowingScans() {
-        Log.d(TAG, "At toggle, allow? " + allowShowScans);
         if(this.allowShowScans) {
             this.showingScans = !this.showingScans;
         }

@@ -6,7 +6,6 @@ import android.util.Log;
 import com.joe.indoorlocalization.Calibration.CalibrationState;
 import com.joe.indoorlocalization.Models.FingerPrint;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.TreeMap;
 

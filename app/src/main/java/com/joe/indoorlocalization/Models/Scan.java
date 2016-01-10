@@ -10,10 +10,6 @@ public class Scan {
     private String RSSI;
     private String network;
 
-    public Scan() {
-
-    }
-
     public Scan(FingerPrint fingerPrint, String mac, String RSSI) {
         this.fingerPrint = fingerPrint;
         this.mac = mac;

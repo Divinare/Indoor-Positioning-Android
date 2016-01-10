@@ -2,12 +2,8 @@ package com.joe.indoorlocalization;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.graphics.Point;
-import android.graphics.PointF;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -47,22 +43,17 @@ public class CustomImageView extends ImageView {
     public CustomImageView(Context context) {
         super(context);
         sharedConstructing(context);
-        Log.d(TAG, "Drawer not set");
-
     }
 
     public CustomImageView(Context context, AttributeSet attrs, Drawer drawer) {
         super(context, attrs);
         sharedConstructing(context);
         this.drawer = drawer;
-        Log.d(TAG, "Drawer set2");
-
     }
 
     public CustomImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
         sharedConstructing(context);
-        Log.d(TAG, "Drawer not set2");
     }
 
     private void sharedConstructing(Context context) {
@@ -82,12 +73,8 @@ public class CustomImageView extends ImageView {
                 mScaleDetector.onTouchEvent(event);
                 Point curr = new Point((int)event.getX(), (int)event.getY());
 
-                Point imagePoint = convertScreenPointToImagePointFromEvent(event);
-
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        //last.set(curr);
-                        //start.set(last);
                         last = curr;
                         start = last;
                         mode = DRAG;
@@ -121,13 +108,6 @@ public class CustomImageView extends ImageView {
         });
     }
 
-    private Point convertScreenPointToImagePointFromEvent(MotionEvent event) {
-        return convertScreenPointToImagePoint(new Point((int)event.getX(), (int)event.getY()));
-    }
-
-    public void setMaxZoom(float x) {
-        maxScale = x;
-    }
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScaleBegin(ScaleGestureDetector detector) {

@@ -8,7 +8,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.joe.indoorlocalization.ApplicationState;
-import com.joe.indoorlocalization.Calibration.CalibrateActivity;
 import com.joe.indoorlocalization.CustomImageView;
 import com.joe.indoorlocalization.IndoorLocalization;
 import com.joe.indoorlocalization.R;
@@ -71,8 +70,5 @@ public class AlgorithmMain {
             Log.d(TAG, "Not allowed to change floor. Should: " + shouldChangeFloor + " auto: " + state.getAutomaticallyChangeFloor());
         }
         Log.d(TAG, "Current floor is: " + this.state.getCurrentFloor());
-
     }
-
-
 }

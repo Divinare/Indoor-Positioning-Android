@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.joe.indoorlocalization.ApplicationState;
@@ -19,10 +18,7 @@ import com.joe.indoorlocalization.CustomImageView;
 import com.joe.indoorlocalization.Drawer;
 import com.joe.indoorlocalization.IndoorLocalization;
 import com.joe.indoorlocalization.Models.FingerPrint;
-import com.joe.indoorlocalization.Models.Scan;
 import com.joe.indoorlocalization.R;
-
-import java.util.ArrayList;
 
 /**
  * Created by joe on 30/12/15.
@@ -39,7 +35,6 @@ public class DrawerCalibrate extends Drawer {
     }
 
     private void drawCurrentFingerPrints(Canvas canvas, CustomImageView view) {
-        Log.d(TAG, "At you know : o");
         for(Point point: cState.getCurrentScanLocations()) {
             Point screenPoint = view.convertImagePointToScreenPoint(new Point(point.x, point.y));
             Paint paint = new Paint();
@@ -104,9 +99,7 @@ public class DrawerCalibrate extends Drawer {
                }
            }
         }
-        Log.d(TAG, "Nearest distance: " + nearestDistance);
         if(nearestDistance < 150) {
-            Log.d(TAG, "making fp removable with z " + nearestZ + " x : " + nearestX + " y " + nearestY);
             createRemoveScanButton(context, view, nearestX, nearestY, nearestZ);
 
             Paint paint = new Paint();
@@ -117,6 +110,7 @@ public class DrawerCalibrate extends Drawer {
         }
 
     }
+
     // REMOVE btn
     private void createRemoveScanButton(Context context, final CustomImageView view, final float x, final float y, final int z) {
         View rootView = ((Activity)context).getWindow().getDecorView().findViewById(android.R.id.content);
@@ -140,6 +134,8 @@ public class DrawerCalibrate extends Drawer {
             @Override
             public void onClick(View v) {
                 state.removeFingerPrint(z, x, y);
+                ViewGroup parentView = (ViewGroup) v.getParent();
+                parentView.removeView(v);
                 view.invalidate();
             }
         });
@@ -149,9 +145,7 @@ public class DrawerCalibrate extends Drawer {
     }
 
     private void lineCalibrate(Canvas canvas, Context context, CustomImageView view, Point screenPoint) {
-        Log.d(TAG, "at drawScanLine");
         if(cState.getLockToDrawing()) {
-            Log.d(TAG, "Drawing was locked.");
             drawPointsAndLine(canvas, view, cState);
             return;
         }
@@ -180,8 +174,6 @@ public class DrawerCalibrate extends Drawer {
                 } else {
                     cState.setSelectedPoint("point2");
                 }
-            } else {
-                Log.d(TAG, "Points weren't selectable, should they be?");
             }
         } else if(!cState.getSelectedPoint().equals("")) {
             if(cState.getSelectedPoint().equals("point1") && !cState.point1Locked)  {
@@ -197,8 +189,6 @@ public class DrawerCalibrate extends Drawer {
             yTextView.setText("y: " + imagePoint.y);
             TextView zTextView = (TextView)rootView.findViewById(R.id.positionZ);
             zTextView.setText("z: " + state.getCurrentFloor());
-            Log.d(TAG, "Curr loor " + state.getCurrentFloor());
-
         }
         drawPointsAndLine(canvas, view, cState);
         if(cState.pointsExist()) {
@@ -273,7 +263,6 @@ public class DrawerCalibrate extends Drawer {
         if(this.cState.getViewCurrentFingerPrints() && this.cState.getCurrentScanLocations().size() > 0) {
             drawCurrentFingerPrints(canvas, view);
         } else if (this.cState.showingScans()) {
-            Log.d(TAG, "at calibrate draw, return cuz showing scans");
             handleShowScans(canvas, context, view, screenPoint);
         } else {
             lineCalibrate(canvas, context, view, screenPoint);

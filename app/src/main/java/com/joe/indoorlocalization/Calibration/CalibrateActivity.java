@@ -2,43 +2,32 @@ package com.joe.indoorlocalization.Calibration;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
-import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Point;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -47,7 +36,6 @@ import android.widget.Toast;
 
 import com.joe.indoorlocalization.ApplicationState;
 import com.joe.indoorlocalization.CustomImageView;
-import com.joe.indoorlocalization.Drawer;
 import com.joe.indoorlocalization.FileChooser;
 import com.joe.indoorlocalization.IndoorLocalization;
 import com.joe.indoorlocalization.Locate.LocateActivity;
@@ -55,13 +43,9 @@ import com.joe.indoorlocalization.Models.ExportFile;
 import com.joe.indoorlocalization.Models.FingerPrint;
 import com.joe.indoorlocalization.Models.ImportFile;
 import com.joe.indoorlocalization.Models.Scan;
-import com.joe.indoorlocalization.SideMenu;
 import com.joe.indoorlocalization.R;
+import com.joe.indoorlocalization.SideMenu;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,8 +77,6 @@ public class CalibrateActivity extends AppCompatActivity {
     private ApplicationState state;
     private CalibrationState cState;
     private ImportFile importFile;
-
-
 
     //UI
     private MenuItem menuShowScans;
@@ -133,8 +115,7 @@ public class CalibrateActivity extends AppCompatActivity {
 
     class WifiReceiver extends BroadcastReceiver {
         public void onReceive(Context c, Intent intent) {
-            Log.d("FINGER","FingerPrint received");
-
+            Log.d(TAG, "FingerPrint received");
             if(runningScan) {
                 StringBuilder fingerPrint = new StringBuilder();
                 fingerPrint.append((SystemClock.elapsedRealtime() - scanStartTime) + ";");
@@ -151,7 +132,6 @@ public class CalibrateActivity extends AppCompatActivity {
                         }
                     }
                 }
-                Log.d("FINGER", "FingerPrint initiated");
                 fingerPrintData.add(fingerPrint);
                 mainWifi.startScan();
                 scanHasStarted = true;
@@ -403,7 +383,7 @@ public class CalibrateActivity extends AppCompatActivity {
         btn.setLayoutParams(params);
     }
 
-    // creates  bottomBarHeight x bottomBarHeight relativeLayout
+    // creates LinearLayout.LayoutParams of bottomBarHeight x bottomBarHeight
     private LinearLayout.LayoutParams createLinearLayoutParams() {
         LinearLayout.LayoutParams linearLayoutParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -436,6 +416,7 @@ public class CalibrateActivity extends AppCompatActivity {
         dialog.setContentView(R.layout.after_scan_dialog);
         dialog.setTitle("Scan ended");
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
         // SAVE
         Button buttonSave = (Button) dialog.findViewById(R.id.afterScanDialogSave);
         buttonSave.setOnClickListener(new View.OnClickListener() {
@@ -473,7 +454,6 @@ public class CalibrateActivity extends AppCompatActivity {
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface arg0) {
-                Log.d(TAG, "AT DISMISSSSSSSSSSSS, " + fingerPrintData.size());
                 if (fingerPrintData.size() > 0) {
                     saveCurrentScanLocationsIntoCalibrationState();
                     cState.setViewCurrentFingerPrints(true);
@@ -487,21 +467,6 @@ public class CalibrateActivity extends AppCompatActivity {
 
         dialog.show();
     }
-
-    /*
-    private void showScanResults() {
-
-        Dialog dialog = new Dialog(CalibrateActivity.this);
-        dialog.setContentView(R.layout.popup_dialog);
-        dialog.setTitle("Scan Results");
-        TextView dialogTextView = (TextView) dialog.findViewById(R.id.popupDialog);
-        dialogTextView.setText(fingerPrintData.toString());
-        Log.d(TAG, "real currentFpData:");
-        Log.d(TAG, fingerPrintData.toString());
-        dialog.show();
-
-    }
-    */
 
     private void saveCurrentScanLocationsIntoCalibrationState() {
         long scanTime = (scanEndTime - scanStartTime);
@@ -558,7 +523,6 @@ public class CalibrateActivity extends AppCompatActivity {
                 float result = (int)((p1.y - p2.y)*ratio);
                 y = p1.y - result;
             }
-            Log.d(TAG, "X: " + x + " Y: " + y);
             int z = this.state.getCurrentFloor();
             FingerPrint fp = new FingerPrint(z, x, y);
 
@@ -579,9 +543,6 @@ public class CalibrateActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu, menu);
         this.menuShowScans = menu.findItem(R.id.menu_showScans);
         menuShowScans.setVisible(true);
-     //   Drawable showScansIcon = this.getResources().getDrawable(R.drawable.show_scans);
-     //   menuShowScans.setIcon(showScansIcon);
-     //   cState.setAllowShowScans(true);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -591,8 +552,6 @@ public class CalibrateActivity extends AppCompatActivity {
         menuViewSwitch.setTitle("Locate");
         return super.onPrepareOptionsMenu(menu);
     }
-
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -614,7 +573,6 @@ public class CalibrateActivity extends AppCompatActivity {
         } else if(id == R.id.menu_help) {
             return true;
         } else if(id == R.id.menu_showScans) {
-            Log.d(TAG, "at Menu action, getAllowShowScans: " + cState.getAllowShowScans());
             if(this.cState.getAllowShowScans()) {
                 this.cState.toggleShowingScans();
                 if (!this.cState.showingScans()) {
@@ -633,13 +591,10 @@ public class CalibrateActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1) {
             if(resultCode == Activity.RESULT_OK){
-                Log.d(TAG, "Got result!");
                 String path=data.getStringExtra("path");
-                Log.d(TAG, "result: " + path);
                 importFile.importFile(path);
             }
             if (resultCode == Activity.RESULT_CANCELED) {
-                Log.d(TAG, "Didnt get result from importFile");
                 Toast.makeText(this, "Couldn't get file data", Toast.LENGTH_SHORT);
             }
         }

@@ -1,16 +1,10 @@
 package com.joe.indoorlocalization.Algorithms;
 
-import android.app.Activity;
-import android.content.Context;
 import android.util.Log;
-import android.view.View;
 
 import com.joe.indoorlocalization.ApplicationState;
-import com.joe.indoorlocalization.CustomImageView;
-import com.joe.indoorlocalization.IndoorLocalization;
 import com.joe.indoorlocalization.Models.FingerPrint;
 import com.joe.indoorlocalization.Models.Scan;
-import com.joe.indoorlocalization.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;

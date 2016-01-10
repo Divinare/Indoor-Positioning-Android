@@ -62,9 +62,7 @@
             android:layout_above="@+id/calibrationCoordinates"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
-            android:scaleType="matrix"
-            android:src="@drawable/exactum1" />
-
+            android:scaleType="matrix" />
 
         <LinearLayout
             android:id="@+id/calibrationCoordinates"

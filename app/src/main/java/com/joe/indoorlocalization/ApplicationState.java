@@ -1,6 +1,7 @@
 package com.joe.indoorlocalization;
 
 import android.app.Application;
+import android.content.Context;
 import android.util.Log;
 
 import com.joe.indoorlocalization.Calibration.CalibrationState;
@@ -23,15 +24,21 @@ public class ApplicationState extends Application {
     private double z = 1.0;
     private int currentFloor = 1;
     private boolean automaticallyChangeFloor = true;
+    private String currentAlgorithm = "K_NearestSignal";
     private ArrayList<FingerPrint> fingerPrints = new ArrayList();
+    private ArrayList<FingerPrint> nearestFps = new ArrayList<>();
+
 
     private TreeMap<Integer, String> blueprints = new TreeMap<>();
 
     public ApplicationState() {
         calibrationState = new CalibrationState();
-        floorChanger = new FloorChanger(this);
     }
 
+    public void initFloorChanger(Context context) {
+        floorChanger = new FloorChanger(this);
+        this.floorChanger.init(context);
+    }
 
     public void emptyCurrentDatabase() {
         this.fingerPrints = new ArrayList<>();
@@ -87,11 +94,28 @@ public class ApplicationState extends Application {
         this.automaticallyChangeFloor = !this.automaticallyChangeFloor;
     }
 
+    public void changeCurrentAlgorithm(String algorithm) {
+        this.currentAlgorithm = algorithm;
+    }
+    public String getCurrentAlgorithm() {
+        return this.currentAlgorithm;
+    }
+
     public TreeMap<Integer, String> getBlueprints() {
         return this.blueprints;
     }
 
     public void addToBlueprints(int floorNumber, String path) {
         this.blueprints.put(floorNumber, path);
+    }
+
+    public ArrayList<FingerPrint> getNearestFps() {
+        return this.nearestFps;
+    }
+    public void setNearestFps(ArrayList<FingerPrint> nearestFps) {
+        this.nearestFps = nearestFps;
+    }
+    public void addToNearestFps(FingerPrint fp) {
+        this.nearestFps.add(fp);
     }
 }

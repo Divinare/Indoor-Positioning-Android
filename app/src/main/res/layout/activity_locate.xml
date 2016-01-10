@@ -59,21 +59,21 @@
             android:layout_above="@+id/locationBottomBar"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
-            android:scaleType="matrix"
-            android:src="@drawable/exactum1" />
+            android:scaleType="matrix" />
 
 
         <RelativeLayout
             android:id="@+id/locationBottomBar"
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="80dp"
             android:paddingLeft="20dp"
             android:paddingRight="20dp"
             android:paddingTop="1dp"
             android:paddingBottom="1dp"
             android:layout_centerHorizontal="true"
-            android:layout_alignParentBottom="true">
+            android:layout_alignParentBottom="true"
+            android:background="#000">
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
@@ -86,13 +86,30 @@
                     android:text="x: - y: - z: -"
                     android:layout_alignParentBottom="true"
                     android:layout_centerHorizontal="true"
+                    android:textColor="#FFF"
                     android:layout_weight="1" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/locationCurrentAlgorithmBar"
+                android:layout_width="match_parent"
+                android:layout_height="25dp"
+                android:layout_above="@+id/locationAutoFloorBar">
+
+                <TextView
+                    android:id="@+id/locateCurrentAlgorithmText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Current algorithm: K_NearestSignal"
+                    android:textColor="#FFF"
+                    android:layout_weight="1" />
+
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/locationAutoFloorBar"
                 android:layout_width="match_parent"
-                android:layout_height="30dp"
+                android:layout_height="25dp"
                 android:layout_alignParentBottom="true">
 
                 <TextView
@@ -100,9 +117,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Switch floor automatically [ON]"
+                    android:textColor="#FFF"
                     android:layout_weight="1" />
 
             </LinearLayout>
+
 
         </RelativeLayout>
 

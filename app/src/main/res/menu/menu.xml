@@ -2,6 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto" >
 
+    <item android:id="@+id/select_algorithm"
+          android:title="Algorithm"
+          app:showAsAction="always" />
     <item
         android:id="@+id/menu_viewSwitch"
         android:title="Locate"

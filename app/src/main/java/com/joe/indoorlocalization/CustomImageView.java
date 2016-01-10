@@ -244,8 +244,4 @@ public class CustomImageView extends ImageView {
         fixTrans();
     }
 
-    public Point getLastPoint() {
-        return convertScreenPointToImagePoint(last);
-    }
-
 } 

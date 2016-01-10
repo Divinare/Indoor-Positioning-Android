@@ -3,6 +3,8 @@ package com.joe.indoorlocalization.Calibration;
 import android.graphics.Point;
 import android.util.Log;
 
+import com.joe.indoorlocalization.Models.FingerPrint;
+
 import java.util.ArrayList;
 
 /**

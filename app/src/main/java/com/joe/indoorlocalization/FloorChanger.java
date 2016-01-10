@@ -13,6 +13,8 @@ import com.joe.indoorlocalization.Calibration.CustomImageViewCalibrate;
 import com.joe.indoorlocalization.Locate.CustomImageViewLocate;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Created by joe on 09/01/16.
@@ -21,27 +23,31 @@ public class FloorChanger {
 
     private ApplicationState state;
     static String TAG = FloorChanger.class.getSimpleName();
-
+    private ArrayList<Integer> floorNumbers = new ArrayList<>();
 
     public FloorChanger(ApplicationState state) {
         this.state = state;
-        init();
     }
 
-    private void init() {
-        dynamicallyAddBlueprints();
+    public void init(Context context) {
+        dynamicallyAddBlueprints(context);
     }
 
-    private void dynamicallyAddBlueprints() {
-        File blueprintsDir = new File("/sdcard/Android/data/com.joe.indoorlocalization/files/Documents/blueprints/");
+    private void dynamicallyAddBlueprints(Context context) {
+        String appDir = context.getExternalFilesDir(null).getAbsolutePath();
+        File blueprintsDir = new File(appDir + "/Documents/blueprints/");
+
+        //File blueprintsDir = new File("/sdcard/Android/data/com.joe.indoorlocalization/files/Documents/blueprints/");
         if(!blueprintsDir.exists()) {
             blueprintsDir.mkdirs();
         }
         File[] blueprintFiles = blueprintsDir.listFiles();
+        Log.d(TAG, "blueprintFilesLength: " + blueprintFiles.length);
         for(File blueprint : blueprintFiles) {
             Log.d(TAG, blueprint.getAbsolutePath());
             String path = blueprint.getAbsolutePath();
             int floorNumber = getFloorNumberFromFileName(blueprint.getName());
+            this.floorNumbers.add(floorNumber);
             this.state.addToBlueprints(floorNumber, path);
         }
     }
@@ -50,6 +56,24 @@ public class FloorChanger {
         String[] tokens  = fileName.split("\\.(?=[^\\.]+$)");
         char lastChar = tokens[0].charAt(tokens[0].length() - 1); // tokens[0] is the fileName without extension (like .png)
         return Integer.parseInt("" + lastChar);
+    }
+
+    public void changeToInitialFloor(Context context, String className) {
+        Collections.sort(floorNumbers);
+        if(this.floorNumbers.get(0) == null ) {
+            Toast.makeText(context, "There were no floor blueprints (.png) at blueprints folder, put there some", Toast.LENGTH_LONG).show();
+            return;
+        }
+        int initialFloorNumber = 0;
+        // If there is basement and floor 1, then initial floor is 1
+        if(this.floorNumbers.get(1) != null && this.floorNumbers.get(0) == 0 && this.floorNumbers.get(1) == 1) {
+            initialFloorNumber = 1;
+        }
+        else {
+            // The smallest initial floorNumber is at index 0
+            initialFloorNumber = this.floorNumbers.get(0);
+        }
+        changeFloor(context, initialFloorNumber, className);
     }
 
     public void changeFloor(Context context, int floorNumber, String className) {

@@ -90,15 +90,18 @@ public class CalibrateActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
+
         sideMenu.initSideMenu("calibration", this);
+        this.state = ((IndoorLocalization)getApplicationContext()).getApplicationState();
+        this.cState = state.calibrationState;
+        this.state.floorChanger.changeToInitialFloor(this, "calibration");
+
         mainWifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
         wakeLock = pm.newWakeLock(
                 PowerManager.SCREEN_DIM_WAKE_LOCK, "My wakelock");
         receiverWifi = new WifiReceiver();
         registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-        this.state = ((IndoorLocalization)getApplicationContext()).getApplicationState();
-        this.cState = state.calibrationState;
         importFile = new ImportFile(this, "calibrate");
         createStartRecordingBtn();
     }
@@ -222,19 +225,17 @@ public class CalibrateActivity extends AppCompatActivity {
         btnStartRecording.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startScan();
-                cState.setPointsSelectable(false);
-                cState.setLockToDrawing(true);
-                cState.setAllowShowScans(false);
-                createStopRecordingBtn();
+                if(cState.pointsExist()) {
+                    startScan();
+                    cState.setPointsSelectable(false);
+                    cState.setLockToDrawing(true);
+                    cState.setAllowShowScans(false);
+                    createStopRecordingBtn();
+                } else {
+                    Toast.makeText(CalibrateActivity.this, "To record, you have to set two points S (start) and E (end). Use lock button to lock a selected point.", Toast.LENGTH_LONG).show();
+                }
             }
         });
-
-        if(this.cState.pointsExist()) {
-            btnStartRecording.setEnabled(true);
-        } else {
-            btnStartRecording.setEnabled(false);
-        }
         bottomBar.addView(btnStartRecording);
 
         // LOCK btn
@@ -548,6 +549,8 @@ public class CalibrateActivity extends AppCompatActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem select_algorithm = menu.findItem(R.id.select_algorithm);
+        select_algorithm.setVisible(false);
         MenuItem menuViewSwitch = menu.findItem(R.id.menu_viewSwitch);
         menuViewSwitch.setTitle("Locate");
         return super.onPrepareOptionsMenu(menu);

@@ -1,19 +1,23 @@
 package com.joe.indoorlocalization.Locate;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.PowerManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +31,7 @@ import com.joe.indoorlocalization.Models.ImportFile;
 import com.joe.indoorlocalization.R;
 import com.joe.indoorlocalization.SideMenu;
 
+import java.io.File;
 import java.util.List;
 
 public class LocateActivity extends AppCompatActivity {
@@ -59,7 +64,7 @@ public class LocateActivity extends AppCompatActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        sideMenu.initSideMenu("locate", this);
+        this.state = ((IndoorLocalization)getApplicationContext()).getApplicationState();
 
         mainWifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
@@ -67,11 +72,11 @@ public class LocateActivity extends AppCompatActivity {
                 PowerManager.SCREEN_DIM_WAKE_LOCK, "My wakelock");
         receiverWifi = new WifiReceiver();
         this.registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-        this.state = ((IndoorLocalization)getApplicationContext()).getApplicationState();
 
         algorithmMain = new AlgorithmMain(this);
         importFile = new ImportFile(this, "locate");
-        importFile.importFile("/sdcard/Android/data/com.joe.indoorlocalization/files/Documents/dataJoe.txt");
+        File file = new File(this.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "dataJoe.txt");
+        importFile.importFile(file.getPath());
         mainWifi.startScan();
         handleAutomaticFloorSwitch();
     }
@@ -89,6 +94,15 @@ public class LocateActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        if(hasFocus){
+            state.initFloorChanger(this);
+            this.state.floorChanger.changeToInitialFloor(this, "locate");
+            this.sideMenu.initSideMenu("locate", this);
+        }
     }
 
     protected void onPause() {
@@ -129,6 +143,21 @@ public class LocateActivity extends AppCompatActivity {
         }
     }
 
+    private void showAlgorithmSelectDialog() {
+        final CharSequence algorithms[] = new CharSequence[] {"K_NearestSignal", "Weighted_K_NearestSignal", "K_Nearest_FingerPrint", "Weighted_K_Nearest_FingerPrint"};
+        AlertDialog.Builder selectDialog = new AlertDialog.Builder(this);
+        selectDialog.setTitle("Select a locate algorithm");
+        selectDialog.setItems(algorithms, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int index) {
+                state.changeCurrentAlgorithm(algorithms[index].toString());
+                TextView currentAlgorithmView = (TextView) findViewById(R.id.locateCurrentAlgorithmText);
+                currentAlgorithmView.setText("Current algorithm: " + state.getCurrentAlgorithm());
+            }
+        });
+        selectDialog.show();
+    }
+
     // OPTIONS
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -139,10 +168,13 @@ public class LocateActivity extends AppCompatActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem select_algorithm = menu.findItem(R.id.select_algorithm);
+        select_algorithm.setVisible(true);
         MenuItem menuViewSwitch = menu.findItem(R.id.menu_viewSwitch);
         menuViewSwitch.setTitle("Calibrate");
         MenuItem menuShowScans = menu.findItem(R.id.menu_showScans);
         menuShowScans.setVisible(false);
+
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -159,6 +191,8 @@ public class LocateActivity extends AppCompatActivity {
         int id = item.getItemId();
         if (id == R.id.menu_viewSwitch) {
             this.startActivity(intentCalibrate);
+        } else if(id == R.id.select_algorithm) {
+            showAlgorithmSelectDialog();
         } else if(id == R.id.menu_import_database) {
             this.startActivityForResult(intentImportDatabase, 1);
             return true;

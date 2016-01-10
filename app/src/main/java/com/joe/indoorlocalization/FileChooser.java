@@ -3,8 +3,11 @@ package com.joe.indoorlocalization;
 import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,7 +32,8 @@ public class FileChooser extends ListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        currentDir = new File("/sdcard/Android/data/com.joe.indoorlocalization/files/Documents/");
+        String appDir = this.getExternalFilesDir(null).getAbsolutePath();
+        currentDir = new File(appDir + "/Documents/");
         fill(currentDir);
     }
 

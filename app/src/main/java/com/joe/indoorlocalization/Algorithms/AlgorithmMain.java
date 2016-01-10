@@ -24,7 +24,11 @@ public class AlgorithmMain {
     private CustomImageView customImageView;
 
     // ALGORITHMS
-    private K_NearestAlgorithm k_nearestAlgorithm;
+    private K_NearestSignal k_nearestSignal;
+    private Weighted_K_NearestSignal weighted_k_nearestSignal;
+    private K_Nearest_FingerPrint k_nearest_fingerPrint;
+    private Weighted_K_Nearest_FingerPrint weighted_k_nearest_fingerPrint;
+
 
     public AlgorithmMain(Context context) {
         this.context = context;
@@ -32,11 +36,30 @@ public class AlgorithmMain {
         View rootView = ((Activity)context).getWindow().getDecorView().findViewById(android.R.id.content);
         this.customImageView = (CustomImageView)rootView.findViewById(R.id.customImageViewLocate);
 
-        this.k_nearestAlgorithm = new K_NearestAlgorithm(this, this.state);
+        this.k_nearestSignal = new K_NearestSignal(this, this.state);
+        this.weighted_k_nearestSignal = new Weighted_K_NearestSignal(this, this.state);
+        this.k_nearest_fingerPrint = new K_Nearest_FingerPrint(this, this.state);
+        this.weighted_k_nearest_fingerPrint = new Weighted_K_Nearest_FingerPrint(this, this.state);
     }
 
     public void calcLocation(StringBuilder currentFingerPrintData) {
-        k_nearestAlgorithm.calcLocation(currentFingerPrintData);
+        Log.d(TAG, "Data in DB: " + this.state.getFingerPrints().size());
+        String algorithm = this.state.getCurrentAlgorithm();
+        if(algorithm.equals("K_NearestSignal")) {
+            Log.d(TAG, "Using K_NearestSignal Algoritm");
+            this.k_nearestSignal.calcLocation(currentFingerPrintData);
+        } else if(algorithm.equals("Weighted_K_NearestSignal")) {
+            Log.d(TAG, "Using Weighted_K_NearestSignal Algoritm");
+            this.weighted_k_nearestSignal.calcLocation(currentFingerPrintData);
+        } else if(algorithm.equals("K_Nearest_FingerPrint")) {
+            Log.d(TAG, "Using K_Nearest_FingerPrint Algoritm");
+            this.k_nearest_fingerPrint.calcLocation(currentFingerPrintData);
+        } else if(algorithm.equals("Weighted_K_Nearest_FingerPrint")) {
+            Log.d(TAG, "Using Weighted_K_Nearest_FingerPrint Algoritm");
+            this.weighted_k_nearest_fingerPrint.calcLocation(currentFingerPrintData);
+        } else {
+            Log.d(TAG, "Algorithm not found, for unknown reason");
+        }
     }
 
         // results[] should contain float z, int x, int y
@@ -44,8 +67,10 @@ public class AlgorithmMain {
         View rootView = ((Activity)context).getWindow().getDecorView().findViewById(android.R.id.content);
         TextView locationCoordinates = (TextView) rootView.findViewById(R.id.locationCoordinates);
 
-        float z = Float.parseFloat(results[0]);
-        if(z == -1) {
+        double zDouble = Double.parseDouble(results[0]);
+        int z = (int) Math.round(zDouble);
+
+        if(zDouble == -1) {
             locationCoordinates.setText("x: - y: - z: -");
             Log.d(TAG, "Error at location algorithm, was not able to find familiar mac addresses");
             Toast.makeText(context, "Location error: was not able to find familiar mac addresses in this area", Toast.LENGTH_LONG).show();
@@ -55,20 +80,14 @@ public class AlgorithmMain {
         int y = Integer.parseInt(results[2]);
         state.setX(x);
         state.setY(y);
-        state.setZ(z);
-        customImageView.invalidate();
-        Log.d(TAG, "Z ON NYT " + z);
-        Log.d(TAG, "PYÖRISTETTY Z: " + ((int) z));
+        state.setZ(zDouble);
 
-        Log.i(TAG, "RESULT: z: " + z + " x: " + x + " y: " + y);
-        locationCoordinates.setText("x: " + x + " y: " + y + " z: " + z);
+        locationCoordinates.setText("x: " + x + " y: " + y + " z: " + results[0]);
 
-        boolean shouldChangeFloor = ((int)z != this.state.getCurrentFloor()) ? true : false;
+        boolean shouldChangeFloor = (z != this.state.getCurrentFloor()) ? true : false;
         if(shouldChangeFloor && this.state.getAutomaticallyChangeFloor()) {
-            state.floorChanger.changeFloor(context, (int) z, "locate");
-        } else {
-            Log.d(TAG, "Not allowed to change floor. Should: " + shouldChangeFloor + " auto: " + state.getAutomaticallyChangeFloor());
+            state.floorChanger.changeFloor(context, z, "locate");
         }
-        Log.d(TAG, "Current floor is: " + this.state.getCurrentFloor());
+        customImageView.invalidate();
     }
 }

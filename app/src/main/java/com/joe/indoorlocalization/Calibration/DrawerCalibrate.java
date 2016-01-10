@@ -34,6 +34,17 @@ public class DrawerCalibrate extends Drawer {
         this.cState = this.state.calibrationState;
     }
 
+    @Override
+    public void draw(Canvas canvas, Context context, CustomImageView view, Point screenPoint) {
+        if(this.cState.getViewCurrentFingerPrints() && this.cState.getCurrentScanLocations().size() > 0) {
+            drawCurrentFingerPrints(canvas, view);
+        } else if (this.cState.showingScans()) {
+            handleShowScans(canvas, context, view, screenPoint);
+        } else {
+            lineCalibrate(canvas, context, view, screenPoint);
+        }
+    }
+
     private void drawCurrentFingerPrints(Canvas canvas, CustomImageView view) {
         for(Point point: cState.getCurrentScanLocations()) {
             Point screenPoint = view.convertImagePointToScreenPoint(new Point(point.x, point.y));
@@ -158,7 +169,7 @@ public class DrawerCalibrate extends Drawer {
 
         int distanceForPoint1 = Integer.MAX_VALUE;
         int distanceForPoint2 = Integer.MAX_VALUE;
-        int maxDistanceForSelection = 150; // Todo, calc it by looking screen width + also zoom level could affect it!
+        int maxDistanceForSelection = 50; // Todo, calc it by looking screen width + also zoom level could affect it!
 
         if (cState.point1 != null) {
             distanceForPoint1 = calcDistanceBetweenTwoPoints(cState.point1, imagePoint);
@@ -191,6 +202,8 @@ public class DrawerCalibrate extends Drawer {
             zTextView.setText("z: " + state.getCurrentFloor());
         }
         drawPointsAndLine(canvas, view, cState);
+        /*
+        TODO: Set background of btnStartRecording grey, if 2 points doesn't exist.
         if(cState.pointsExist()) {
             View rootView = ((Activity) context).getWindow().getDecorView().findViewById(android.R.id.content);
             Button startScanButton = (Button) rootView.findViewById(R.id.btnStartRecording);
@@ -198,6 +211,7 @@ public class DrawerCalibrate extends Drawer {
                 startScanButton.setEnabled(true);
             }
         }
+        */
     }
 
     private void drawPointsAndLine(Canvas canvas, CustomImageView view, CalibrationState cState) {
@@ -255,17 +269,6 @@ public class DrawerCalibrate extends Drawer {
             Point screenPoint = view.convertImagePointToScreenPoint(new Point(point2.x, point2.y));
             canvas.drawCircle(screenPoint.x, screenPoint.y, circleWidth, paintCircle);
             canvas.drawText("E", (screenPoint.x-(circleWidth/2)+3), (screenPoint.y+(circleWidth/2)), paintText);
-        }
-    }
-
-    @Override
-    public void draw(Canvas canvas, Context context, CustomImageView view, Point screenPoint) {
-        if(this.cState.getViewCurrentFingerPrints() && this.cState.getCurrentScanLocations().size() > 0) {
-            drawCurrentFingerPrints(canvas, view);
-        } else if (this.cState.showingScans()) {
-            handleShowScans(canvas, context, view, screenPoint);
-        } else {
-            lineCalibrate(canvas, context, view, screenPoint);
         }
     }
 }

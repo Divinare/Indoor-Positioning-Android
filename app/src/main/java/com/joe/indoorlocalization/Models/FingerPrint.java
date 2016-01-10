@@ -12,6 +12,10 @@ public class FingerPrint {
     private int z;
     private ArrayList<Scan> scans = new ArrayList();
 
+    // For locating
+    private int distance = 0;
+    private int macNotFoundCount = 0;
+
     public FingerPrint(int z, float x, float y) {
         this.z = z;
         this.x = x;
@@ -48,5 +52,27 @@ public class FingerPrint {
     }
     public void setY(float y) {
         this.y = y;
+    }
+
+    public void resetDistance() {
+        this.distance = 0;
+    }
+    public void addToDistance(int num) {
+        this.distance += num;
+    }
+    public int getDistance() {
+        return this.distance;
+    }
+    public void setDistance(int distance) {
+        this.distance = distance;
+    }
+    public void increaseMacNotFoundCount() {
+        this.macNotFoundCount++;
+    }
+    public int getMacNotFoundCount() {
+        return this.macNotFoundCount;
+    }
+    public void resetMacNotFoundCount() {
+        this.macNotFoundCount = 0;
     }
 }

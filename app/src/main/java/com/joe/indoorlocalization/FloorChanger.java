@@ -34,15 +34,18 @@ public class FloorChanger {
     }
 
     private void dynamicallyAddBlueprints(Context context) {
+        Log.d(TAG, "Dynamically adding blueprints");
         String appDir = context.getExternalFilesDir(null).getAbsolutePath();
         File blueprintsDir = new File(appDir + "/Documents/blueprints/");
-
         //File blueprintsDir = new File("/sdcard/Android/data/com.joe.indoorlocalization/files/Documents/blueprints/");
         if(!blueprintsDir.exists()) {
             blueprintsDir.mkdirs();
         }
         File[] blueprintFiles = blueprintsDir.listFiles();
         Log.d(TAG, "blueprintFilesLength: " + blueprintFiles.length);
+        if(blueprintFiles.length == 0) {
+            Toast.makeText(context, "Could not read blueprints files from appPath/files/Documents/blueprints folder. Are the blueprints too large? Maximum size for a blueprint is 4096 x 4096", Toast.LENGTH_LONG).show();
+        }
         for(File blueprint : blueprintFiles) {
             Log.d(TAG, blueprint.getAbsolutePath());
             String path = blueprint.getAbsolutePath();
@@ -79,6 +82,16 @@ public class FloorChanger {
     public void changeFloor(Context context, int floorNumber, String className) {
         if(!this.state.calibrationState.getAllowChangeFloor()) {
             Toast.makeText(context, "Floor change is not allowed at this moment", Toast.LENGTH_LONG).show();
+            return;
+        }
+        boolean floorFound = false;
+        for(int num : this.floorNumbers) {
+            if(num == floorNumber) {
+                floorFound = true;
+            }
+        }
+        if(!floorFound) {
+            Toast.makeText(context, "Tried to change to floor " + floorNumber + " that doesn't exist! Are you using wrong location data?", Toast.LENGTH_LONG).show();
             return;
         }
 

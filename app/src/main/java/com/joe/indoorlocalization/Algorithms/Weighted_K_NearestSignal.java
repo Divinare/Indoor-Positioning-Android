@@ -2,7 +2,7 @@ package com.joe.indoorlocalization.Algorithms;
 
 import android.util.Log;
 
-import com.joe.indoorlocalization.ApplicationState;
+import com.joe.indoorlocalization.State.ApplicationState;
 import com.joe.indoorlocalization.Models.FingerPrint;
 import com.joe.indoorlocalization.Models.Scan;
 
@@ -22,7 +22,6 @@ public class Weighted_K_NearestSignal {
 
     private AlgorithmMain algorithmMain;
     private ApplicationState state;
-
     int k = 5;
 
     public Weighted_K_NearestSignal(AlgorithmMain algorithmMain, ApplicationState state) {
@@ -31,7 +30,6 @@ public class Weighted_K_NearestSignal {
     }
 
     public void calcLocation(StringBuilder currentFingerPrintData) {
-
         String currentFP = currentFingerPrintData.toString();
 
         String[] currentFPArray = currentFP.split(";");

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:padding="10dp"
+    android:background="#000">
+
+    <TextView
+        android:id="@+id/helpDialogTopic"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Help"
+        android:textSize="30sp"
+        android:gravity="center"
+        android:textColor="#FFF"/>
+
+    <TextView
+        android:id="@+id/helpDialogContent"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="vertical"
+        android:maxLines = "100"
+        android:text="The max blueprint image size for this application 4096x4096.
+        \n\nYou can import location data from a file named “dataJoe.txt” to the application’s memory by choosing “import file” from the application's menu. Or you can export location data that is currently in the memory to a file named “dataJoe.txt” by choosing “export file” from the application's menu. Note that this will overwrite existing data in “dataJoe.txt”.
+        \n\nIn the calibration phase, choose a starting point “S” and an ending point “E”. After that, press “start recording” and walk with a steady speed from point “S” to point “E”. After reaching point “E” press “stop recording“. You can then view the recordings, save or dismiss them."
+        android:layout_below="@+id/helpDialogTopic"
+
+        android:textSize="22sp"
+        android:textColor="#FFF"/>
+
+
+</RelativeLayout>

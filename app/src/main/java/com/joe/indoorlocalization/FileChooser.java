@@ -3,17 +3,16 @@ package com.joe.indoorlocalization;
 import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Environment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.joe.indoorlocalization.State.ApplicationState;
 
 import java.io.File;
 import java.util.ArrayList;

@@ -5,8 +5,8 @@ import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.joe.indoorlocalization.ApplicationState;
-import com.joe.indoorlocalization.Calibration.CalibrateActivity;
+import com.joe.indoorlocalization.State.ApplicationState;
+import com.joe.indoorlocalization.Calibrate.CalibrateActivity;
 import com.joe.indoorlocalization.IndoorLocalization;
 import com.joe.indoorlocalization.Locate.LocateActivity;
 

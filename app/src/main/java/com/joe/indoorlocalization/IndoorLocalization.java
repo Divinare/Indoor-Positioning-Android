@@ -2,6 +2,8 @@ package com.joe.indoorlocalization;
 
 import android.app.Application;
 
+import com.joe.indoorlocalization.State.ApplicationState;
+
 /**
  * Created by joe on 31/12/15.
  */

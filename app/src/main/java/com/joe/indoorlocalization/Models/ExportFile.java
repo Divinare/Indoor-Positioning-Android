@@ -5,7 +5,7 @@ import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.joe.indoorlocalization.ApplicationState;
+import com.joe.indoorlocalization.State.ApplicationState;
 import com.joe.indoorlocalization.IndoorLocalization;
 
 import java.io.File;

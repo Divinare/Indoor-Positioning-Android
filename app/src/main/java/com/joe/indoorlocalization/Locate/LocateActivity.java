@@ -2,34 +2,42 @@ package com.joe.indoorlocalization.Locate;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.PowerManager;
 import android.support.v7.app.AppCompatActivity;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AnimationUtils;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.joe.indoorlocalization.Algorithms.AlgorithmMain;
-import com.joe.indoorlocalization.ApplicationState;
-import com.joe.indoorlocalization.Calibration.CalibrateActivity;
+import com.joe.indoorlocalization.State.ApplicationState;
+import com.joe.indoorlocalization.Calibrate.CalibrateActivity;
 import com.joe.indoorlocalization.FileChooser;
 import com.joe.indoorlocalization.IndoorLocalization;
 import com.joe.indoorlocalization.Models.ExportFile;
 import com.joe.indoorlocalization.Models.ImportFile;
 import com.joe.indoorlocalization.R;
 import com.joe.indoorlocalization.SideMenu;
+import com.joe.indoorlocalization.State.LocateState;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.util.List;
@@ -54,6 +62,7 @@ public class LocateActivity extends AppCompatActivity {
     private ImportFile importFile;
 
     private ApplicationState state;
+    private LocateState lState;
 
 
     @Override
@@ -65,6 +74,7 @@ public class LocateActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         this.state = ((IndoorLocalization)getApplicationContext()).getApplicationState();
+        this.lState = state.locateState;
 
         mainWifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
@@ -79,6 +89,9 @@ public class LocateActivity extends AppCompatActivity {
         importFile.importFile(file.getPath());
         mainWifi.startScan();
         handleAutomaticFloorSwitch();
+
+        LinearLayout locationWeightBar = (LinearLayout) findViewById(R.id.locationWeightBar);
+        locationWeightBar.setVisibility(View.GONE);
     }
 
     private void handleAutomaticFloorSwitch() {
@@ -143,16 +156,48 @@ public class LocateActivity extends AppCompatActivity {
         }
     }
 
+    public void increaseWeight(View v) {
+        changeWeight(true);
+    }
+
+    public void decreaseWeight(View v) {
+        changeWeight(false);
+    }
+
+    private void changeWeight(boolean increase) {
+        TextView locationWeightCount = (TextView) findViewById(R.id.locationWeightCount);
+
+        int currentWeight = Integer.parseInt("" + locationWeightCount.getText());
+
+        if(increase) {
+            currentWeight += 5;
+        } else {
+            currentWeight -= 5;
+        }
+        locationWeightCount.setText("" + currentWeight);
+    }
+
+
     private void showAlgorithmSelectDialog() {
-        final CharSequence algorithms[] = new CharSequence[] {"K_NearestSignal", "Weighted_K_NearestSignal", "K_Nearest_FingerPrint", "Weighted_K_Nearest_FingerPrint"};
+        final CharSequence algorithms[] = new CharSequence[] {"K_NearestSignal", "K_NearestSignal_Counterweight", "Weighted_K_NearestSignal", "K_Nearest_FingerPrint", "Weighted_K_Nearest_FingerPrint"};
         AlertDialog.Builder selectDialog = new AlertDialog.Builder(this);
         selectDialog.setTitle("Select a locate algorithm");
+
+        final LinearLayout locationWeightBar = (LinearLayout) findViewById(R.id.locationWeightBar);
+        locationWeightBar.setVisibility(View.GONE);
+
         selectDialog.setItems(algorithms, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int index) {
-                state.changeCurrentAlgorithm(algorithms[index].toString());
+                lState.changeCurrentAlgorithm(algorithms[index].toString());
                 TextView currentAlgorithmView = (TextView) findViewById(R.id.locateCurrentAlgorithmText);
-                currentAlgorithmView.setText("Current algorithm: " + state.getCurrentAlgorithm());
+                currentAlgorithmView.setText("Current algorithm: " + lState.getCurrentAlgorithm());
+
+                if(lState.getCurrentAlgorithm().equals("K_NearestSignal_Counterweight")) {
+                    locationWeightBar.setVisibility(View.VISIBLE);
+                } else {
+                    locationWeightBar.setVisibility(View.GONE);
+                }
             }
         });
         selectDialog.show();
@@ -199,6 +244,11 @@ public class LocateActivity extends AppCompatActivity {
         } else if(id == R.id.menu_export_database) {
             exportFile.exportApplicationStateIntoFile();
         } else if(id == R.id.menu_help) {
+            Dialog helpDialog = new Dialog(this);
+            helpDialog.setContentView(R.layout.help_dialog);
+            helpDialog.show();
+            TextView helpDialogContent = (TextView) helpDialog.findViewById(R.id.helpDialogContent);
+            helpDialogContent.setMovementMethod(new ScrollingMovementMethod());
             return true;
         }
 

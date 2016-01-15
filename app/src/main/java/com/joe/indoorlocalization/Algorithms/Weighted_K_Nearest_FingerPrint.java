@@ -1,10 +1,9 @@
 package com.joe.indoorlocalization.Algorithms;
 
-import android.util.Log;
-
-import com.joe.indoorlocalization.ApplicationState;
+import com.joe.indoorlocalization.State.ApplicationState;
 import com.joe.indoorlocalization.Models.FingerPrint;
 import com.joe.indoorlocalization.Models.Scan;
+import com.joe.indoorlocalization.State.LocateState;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,15 +20,20 @@ public class Weighted_K_Nearest_FingerPrint {
 
     private AlgorithmMain algorithmMain;
     private ApplicationState state;
+    private LocateState lState;
+
+    private ArrayList<FingerPrint> nearestFps = new ArrayList<>();
 
     int k = 5;
 
     public Weighted_K_Nearest_FingerPrint(AlgorithmMain algorithmMain, ApplicationState state) {
         this.algorithmMain = algorithmMain;
         this.state = state;
+        this.lState = state.locateState;
     }
 
     public void calcLocation(StringBuilder currentFingerPrintData) {
+        nearestFps = new ArrayList<>();
         String currentFP = currentFingerPrintData.toString();
         String[] currentFPArray = currentFP.split(";");
         ArrayList<FingerPrint> fps = this.state.getFingerPrints();
@@ -102,7 +106,6 @@ public class Weighted_K_Nearest_FingerPrint {
         double zSum = 0;
         int xSum = 0;
         int ySum = 0;
-        this.state.setNearestFps(new ArrayList<FingerPrint>());
 
         ArrayList<FingerPrint> weightedFps = new ArrayList<>();
         ArrayList<Integer> weights = new ArrayList<>();
@@ -126,11 +129,13 @@ public class Weighted_K_Nearest_FingerPrint {
                 zSum += (fp.getZ()*weight);
                 xSum += (fp.getX()*weight);
                 ySum += (fp.getY()*weight);
-                this.state.addToNearestFps(fp);
+                nearestFps.add(fp);
             }
         }
 
         if(iterations > 0) {
+            this.lState.setLocateAlgorithmFps(this.nearestFps);
+
             double z = zSum;
             int x = xSum;
             int y = ySum;

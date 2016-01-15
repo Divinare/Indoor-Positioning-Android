@@ -6,7 +6,7 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Calibration.CalibrateActivity">
+    tools:context=".Calibrate.CalibrateActivity">
 
     <ListView
         android:id="@+id/navList"
@@ -41,20 +41,26 @@
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:layout_weight="1"/>
-
+            <TextView
+                android:id="@+id/floorLocateText"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Floor"
+                android:textSize="20sp" />
             <TextView
                 android:id="@+id/floorCalibration"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="Floor 1"
+                android:text="1"
                 android:textSize="20sp"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
                 android:layout_weight="1"/>
         </LinearLayout>
 
-        <com.joe.indoorlocalization.Calibration.CustomImageViewCalibrate
+        <com.joe.indoorlocalization.Calibrate.CustomImageViewCalibrate
             android:id="@+id/customImageViewCalibrate"
             android:layout_width="fill_parent"
             android:layout_height="match_parent"

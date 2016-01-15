@@ -9,8 +9,9 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.joe.indoorlocalization.Calibration.CustomImageViewCalibrate;
+import com.joe.indoorlocalization.Calibrate.CustomImageViewCalibrate;
 import com.joe.indoorlocalization.Locate.CustomImageViewLocate;
+import com.joe.indoorlocalization.State.ApplicationState;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -124,9 +125,9 @@ public class FloorChanger {
             floorTextView = (TextView)rootView.findViewById(R.id.floorCalibration);
         }
         if(floorNumber == 0) {
-            floorTextView.setText("Floor: basement");
+            floorTextView.setText("basement");
         } else {
-            floorTextView.setText("Floor " + floorNumber);
+            floorTextView.setText("" + floorNumber);
         }
     }
 

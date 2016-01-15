@@ -42,11 +42,18 @@
                 android:layout_weight="1"/>
 
             <TextView
+                android:id="@+id/floorLocateText"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Floor"
+                android:textSize="20sp" />
+            <TextView
                 android:id="@+id/floorLocate"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="Floor 1"
+                android:text="1"
                 android:textSize="20sp"
                 android:layout_weight="1"/>
         </LinearLayout>
@@ -66,7 +73,7 @@
             android:id="@+id/locationBottomBar"
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="80dp"
+            android:layout_height="105dp"
             android:paddingLeft="20dp"
             android:paddingRight="20dp"
             android:paddingTop="1dp"
@@ -75,13 +82,14 @@
             android:layout_alignParentBottom="true"
             android:background="#000">
             <LinearLayout
+                android:id="@+id/locationCoordinatesBar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
                 <TextView
                     android:id="@+id/locationCoordinates"
                     android:layout_width="wrap_content"
-                    android:layout_height="30dp"
+                    android:layout_height="25dp"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:text="x: - y: - z: -"
                     android:layout_alignParentBottom="true"
@@ -94,7 +102,7 @@
                 android:id="@+id/locationCurrentAlgorithmBar"
                 android:layout_width="match_parent"
                 android:layout_height="25dp"
-                android:layout_above="@+id/locationAutoFloorBar">
+                android:layout_below="@+id/locationCoordinatesBar">
 
                 <TextView
                     android:id="@+id/locateCurrentAlgorithmText"
@@ -110,7 +118,7 @@
                 android:id="@+id/locationAutoFloorBar"
                 android:layout_width="match_parent"
                 android:layout_height="25dp"
-                android:layout_alignParentBottom="true">
+                android:layout_below="@+id/locationCurrentAlgorithmBar">
 
                 <TextView
                     android:id="@+id/locateAutoSwitch"
@@ -121,6 +129,50 @@
                     android:layout_weight="1" />
 
             </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/locationWeightBar"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:layout_alignParentBottom="true">
+                <TextView
+                    android:id="@+id/locationWeightText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:text="Weight:"
+                    android:textColor="#FFF"
+                    android:layout_weight="1"/>
+                <TextView
+                    android:id="@+id/locationWeightCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:paddingRight="10dp"
+                    android:text="50"
+                    android:textColor="#FFF"
+                    android:layout_weight="1"/>
+
+                <Button
+                    android:id="@+id/locationMinus"
+                    android:layout_width="50dp"
+                    android:layout_height="30dp"
+                    android:layout_marginRight="10dp"
+                    android:text="-"
+                    android:textColor="#FFF"
+                    android:background="@drawable/buttonshape"
+                    android:layout_weight="1"
+                    android:onClick="decreaseWeight"/>
+                <Button
+                    android:id="@+id/locationPlus"
+                    android:layout_width="50dp"
+                    android:layout_height="30dp"
+                    android:text="+"
+                    android:textColor="#FFF"
+                    android:background="@drawable/buttonshape"
+                    android:layout_weight="1"
+                    android:onClick="increaseWeight"/>
+            </LinearLayout>
+
 
 
         </RelativeLayout>

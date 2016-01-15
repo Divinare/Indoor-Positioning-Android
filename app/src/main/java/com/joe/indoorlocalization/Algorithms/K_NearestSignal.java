@@ -2,16 +2,14 @@ package com.joe.indoorlocalization.Algorithms;
 
 import android.util.Log;
 
-import com.joe.indoorlocalization.ApplicationState;
+import com.joe.indoorlocalization.State.ApplicationState;
 import com.joe.indoorlocalization.Models.FingerPrint;
 import com.joe.indoorlocalization.Models.Scan;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -93,8 +91,9 @@ public class K_NearestSignal {
                 ySum += fingerPrint.getY();
                 nodes++;
             }
+
+            // Calc average of fingerPrints with mac currentMac
             if(nodes > 0) {
-                // Calc average of fingerPrints with mac currentMac
                 if(zSum == 0) {
                     zSum = 0.000000001;
                 }

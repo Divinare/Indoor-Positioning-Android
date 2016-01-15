@@ -1,10 +1,9 @@
 package com.joe.indoorlocalization.Algorithms;
 
-import android.util.Log;
-
-import com.joe.indoorlocalization.ApplicationState;
+import com.joe.indoorlocalization.State.ApplicationState;
 import com.joe.indoorlocalization.Models.FingerPrint;
 import com.joe.indoorlocalization.Models.Scan;
+import com.joe.indoorlocalization.State.LocateState;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,15 +18,20 @@ public class K_Nearest_FingerPrint {
     static String TAG = K_Nearest_FingerPrint.class.getSimpleName();
     private AlgorithmMain algorithmMain;
     private ApplicationState state;
+    private LocateState lState;
+    private ArrayList<FingerPrint> nearestFps;
+
 
     int k = 5;
 
     public K_Nearest_FingerPrint(AlgorithmMain algorithmMain, ApplicationState state) {
         this.algorithmMain = algorithmMain;
         this.state = state;
+        this.lState = state.locateState;
     }
 
     public void calcLocation(StringBuilder currentFingerPrintData) {
+        this.nearestFps = new ArrayList<>();
         String currentFP = currentFingerPrintData.toString();
         String[] currentFPArray = currentFP.split(";");
         ArrayList<FingerPrint> fps = this.state.getFingerPrints();
@@ -99,7 +103,6 @@ public class K_Nearest_FingerPrint {
         double zSum = 0;
         int xSum = 0;
         int ySum = 0;
-        this.state.setNearestFps(new ArrayList<FingerPrint>());
         for(Map.Entry<Integer,FingerPrint> entry : sortedDistances.entrySet()) {
             if(iterations >= nodesLimit) {
                 break;
@@ -109,10 +112,11 @@ public class K_Nearest_FingerPrint {
             xSum += fp.getX();
             ySum += fp.getY();
             iterations++;
-            this.state.addToNearestFps(fp);
+            this.nearestFps.add(fp);
         }
 
         if(iterations > 0) {
+            this.lState.setLocateAlgorithmFps(nearestFps);
             double z = zSum/iterations;
             int x = Math.round(xSum/iterations);
             int y = Math.round(ySum/iterations);
